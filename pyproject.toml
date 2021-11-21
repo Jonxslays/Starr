@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "starr"
+version = "0.1.0"
+description = "A dedicated Starboard bot written using Hikari."
+authors = ["Jonxslays"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.11"
+hikari = "^2.0.0-alpha.103"
+hikari-lightbulb = "^2.0.1"
+asyncpg = "^0.25.0"
+aiofiles = "^0.7.0"
+python-dotenv = "^0.19.2"
+
+[tool.poetry.dev-dependencies]
+black = "^21.11b1"
+mypy = "^0.910"
+types-aiofiles = "^0.7.0"
+
+[tool.black]
+line-length = 99
+
+[tool.mypy]
+strict = true
+
+[[tool.mypy.overrides]]
+module = "asyncpg"
+ignore_missing_imports = true
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
