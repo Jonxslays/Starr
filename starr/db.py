@@ -4,7 +4,6 @@ import typing as t
 from os import environ
 
 import asyncpg
-import aiofiles
 
 
 class AsyncPGDatabase:
@@ -92,5 +91,5 @@ class AsyncPGDatabase:
     @with_connection
     async def scriptexec(self, path: str, conn: asyncpg.Connection) -> None:
         """Execute an sql script at a given path."""
-        async with aiofiles.open(path) as script:
-            await conn.execute((await script.read()))
+        with open(path) as script:
+            await conn.execute(script.read())

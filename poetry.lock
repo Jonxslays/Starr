@@ -1,12 +1,4 @@
 [[package]]
-name = "aiofiles"
-version = "0.7.0"
-description = "File support for asyncio."
-category = "main"
-optional = false
-python-versions = ">=3.6,<4.0"
-
-[[package]]
 name = "aiohttp"
 version = "3.7.4.post0"
 description = "Async http client/server framework (asyncio)"
@@ -262,14 +254,6 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
-name = "types-aiofiles"
-version = "0.7.0"
-description = "Typing stubs for aiofiles"
-category = "dev"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "typing-extensions"
 version = "4.0.0"
 description = "Backported and Experimental Type Hints for Python 3.6+"
@@ -292,13 +276,9 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "91993144103f30197d81cdfc24a8668e076e1d6ccecce9435fe1a93011b0525b"
+content-hash = "6827c123a19fe5399d72f48244cfe52b2fa8175d07f4886e05314f3a6353aa88"
 
 [metadata.files]
-aiofiles = [
-    {file = "aiofiles-0.7.0-py3-none-any.whl", hash = "sha256:c67a6823b5f23fcab0a2595a289cec7d8c863ffcb4322fb8cd6b90400aedfdbc"},
-    {file = "aiofiles-0.7.0.tar.gz", hash = "sha256:a1c4fc9b2ff81568c83e21392a82f344ea9d23da906e4f6a52662764545e19d4"},
-]
 aiohttp = [
     {file = "aiohttp-3.7.4.post0-cp36-cp36m-macosx_10_14_x86_64.whl", hash = "sha256:3cf75f7cdc2397ed4442594b935a11ed5569961333d49b7539ea741be2cc79d5"},
     {file = "aiohttp-3.7.4.post0-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:4b302b45040890cea949ad092479e01ba25911a15e648429c7c5aae9650c67a8"},
@@ -582,10 +562,6 @@ toml = [
 tomli = [
     {file = "tomli-1.2.2-py3-none-any.whl", hash = "sha256:f04066f68f5554911363063a30b108d2b5a5b1a010aa8b6132af78489fe3aade"},
     {file = "tomli-1.2.2.tar.gz", hash = "sha256:c6ce0015eb38820eaf32b5db832dbc26deb3dd427bd5f6556cf0acac2c214fee"},
-]
-types-aiofiles = [
-    {file = "types-aiofiles-0.7.0.tar.gz", hash = "sha256:f1c9aacd8ee8fcf3c66744b4bd0963e1eac3753f0e5c20d71214f53da11bc7e3"},
-    {file = "types_aiofiles-0.7.0-py3-none-any.whl", hash = "sha256:0334df97d4fcc70a29ad82ccbe48b914cd7bf31e6cc95942862057892ec5cc81"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.0.0-py3-none-any.whl", hash = "sha256:829704698b22e13ec9eaf959122315eabb370b0884400e9818334d8b677023d9"},
