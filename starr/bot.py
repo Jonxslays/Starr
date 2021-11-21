@@ -1,4 +1,5 @@
 from os import environ
+from pathlib import Path
 
 import dotenv
 import hikari
@@ -15,20 +16,37 @@ class StarrBot(hikari.GatewayBot):
     __slots__ = ("db", "guilds", "log", "client")
 
     def __init__(self) -> None:
+        super().__init__(
+            token=environ["TOKEN"],
+            intents=(
+                hikari.Intents.GUILD_MESSAGES |
+                hikari.Intents.GUILD_MEMBERS |
+                hikari.Intents.GUILDS
+            )
+        )
+
         self.db = Database()
         self.guilds = GuildStore()
         self.log = Logger.setup()
-
-        super().__init__(
-            token=environ["TOKEN"],
-            intents=hikari.Intents.GUILD_MESSAGES | hikari.Intents.GUILD_MEMBERS,
+        self.client = (
+            tanjun.Client.from_gateway_bot(
+                self,
+                mention_prefix=True,
+                declare_global_commands=int(environ.get("DEV", 0)) or False,
+            )
+            .set_prefix_getter(self.resolve_prefix)
+            .load_modules(*Path("./starr/modules").glob("*.py"))
         )
 
-        self.client = tanjun.Client.from_gateway_bot(
-            self,
-            mention_prefix=True,
-            declare_global_commands=int(environ.get("DEV", 0)) or False,
-        ).set_prefix_getter(self.resolve_prefix)
+        subscriptions = {
+            hikari.StartingEvent: self.on_starting,
+            hikari.StartedEvent: self.on_started,
+            hikari.StoppingEvent: self.on_stopping,
+            hikari.GuildAvailableEvent: self.on_guild_available,
+        }
+
+        for event, callback in subscriptions.items():
+            self.subscribe(event, callback)
 
     async def on_starting(self, _: hikari.StartingEvent) -> None:
         await self.db.connect()
