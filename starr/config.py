@@ -27,7 +27,6 @@ class GuildStore:
         if not (starr_guild := self.get(ident)):
             guild, prefix, channel = await db.row(
                 "INSERT INTO guilds (GuildID) VALUES ($1) "
-                "ON CONFLICT DO NOTHING "
                 "RETURNING GuildID, Prefix, StarChannel;",
                 ident,
             )

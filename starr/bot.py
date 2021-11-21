@@ -32,7 +32,7 @@ class StarrBot(hikari.GatewayBot):
             tanjun.Client.from_gateway_bot(
                 self,
                 mention_prefix=True,
-                declare_global_commands=int(environ.get("DEV", 0)) or False,
+                declare_global_commands=int(environ.get("DEV", 0)) or True,
             )
             .set_prefix_getter(self.resolve_prefix)
             .load_modules(*Path("./starr/modules").glob("*.py"))
@@ -52,8 +52,8 @@ class StarrBot(hikari.GatewayBot):
         await self.db.connect()
 
     async def on_started(self, _: hikari.StartedEvent) -> None:
-        if guilds_data := await self.db.rows("SELECT GuildID, Prefix, StarChannel FROM guilds;"):
-            for guild, prefix, channel in guilds_data:
+        if data := await self.db.rows("SELECT GuildID, Prefix, StarChannel FROM guilds;"):
+            for guild, prefix, channel in data:
                 self.guilds.insert(guild, StarrGuild(guild, prefix, channel))
 
     async def on_stopping(self, _: hikari.StoppingEvent) -> None:
@@ -61,11 +61,17 @@ class StarrBot(hikari.GatewayBot):
 
     async def on_guild_available(self, event: hikari.GuildAvailableEvent) -> None:
         if event.guild_id not in self.guilds:
-            await self.guilds.get_or_insert(event.guild_id, self.db)
+            data = await self.db.row(
+                "INSERT INTO guilds (GuildID) VALUES ($1) "
+                "ON CONFLICT DO NOTHING "
+                "RETURNING GuildID, Prefix, StarChannel;",
+                event.guild_id
+            )
+
+            if data:
+                self.guilds.insert(event.guild_id, StarrGuild(*data))
 
     async def resolve_prefix(self, ctx: tanjun.MessageContext) -> tuple[str]:
-        if ctx.guild_id:
-            guild = await self.guilds.get_or_insert(ctx.guild_id, self.db)
-            return guild.prefix,
-
-        return "$",
+        assert ctx.guild_id is not None
+        guild = await self.guilds.get_or_insert(ctx.guild_id, self.db)
+        return guild.prefix,
