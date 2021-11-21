@@ -6,7 +6,7 @@ from os import environ
 import asyncpg
 
 
-class AsyncPGDatabase:
+class Database:
     """Wrapper class for AsyncPG Database access."""
 
     def __init__(self) -> None:
@@ -35,11 +35,11 @@ class AsyncPGDatabase:
         """Closes the connection pool."""
         await self.pool.close()
 
-    def with_connection(func: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]: # type: ignore
+    def with_connection(func: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:  # type: ignore
         """A decorator used to acquire a connection from the pool."""
 
         @functools.wraps(func)
-        async def wrapper(self: "AsyncPGDatabase", *args: t.Any) -> t.Any:
+        async def wrapper(self: "Database", *args: t.Any) -> t.Any:
             async with self.pool.acquire() as conn:
                 self.calls += 1
                 return await func(self, *args, conn=conn)
@@ -53,7 +53,9 @@ class AsyncPGDatabase:
         return await query.fetchval(*values)
 
     @with_connection
-    async def row(self, q: str, *values: t.Any, conn: asyncpg.Connection) -> t.Optional[t.List[t.Any]]:
+    async def row(
+        self, q: str, *values: t.Any, conn: asyncpg.Connection
+    ) -> t.Optional[t.List[t.Any]]:
         """Read 1 row of applicable data."""
         query = await conn.prepare(q)
         if data := await query.fetchrow(*values):
@@ -62,7 +64,9 @@ class AsyncPGDatabase:
         return None
 
     @with_connection
-    async def rows(self, q: str, *values: t.Any, conn: asyncpg.Connection) -> t.Optional[t.List[t.Iterable[t.Any]]]:
+    async def rows(
+        self, q: str, *values: t.Any, conn: asyncpg.Connection
+    ) -> t.Optional[t.List[t.Iterable[t.Any]]]:
         """Read all rows of applicable data."""
         query = await conn.prepare(q)
         if data := await query.fetch(*values):
@@ -83,7 +87,9 @@ class AsyncPGDatabase:
         await query.fetch(*values)
 
     @with_connection
-    async def executemany(self, q: str, values: t.List[t.Iterable[t.Any]], conn: asyncpg.Connection) -> None:
+    async def executemany(
+        self, q: str, values: t.List[t.Iterable[t.Any]], conn: asyncpg.Connection
+    ) -> None:
         """Execute a write operation for each set of values."""
         query = await conn.prepare(q)
         await query.executemany(values)

@@ -1,12 +1,13 @@
 import hikari
 
-from starr.app import app
+from starr.bot import StarrBot
 
 
 if __name__ == "__main__":
-    app.run(
+    bot = StarrBot()
+    bot.run(
         activity=hikari.Activity(
-            name="you, and counting stars!",
-            type=hikari.ActivityType.PLAYING,
+            name="for stars!",
+            type=hikari.ActivityType.WATCHING,
         )
     )

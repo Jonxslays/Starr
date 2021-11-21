@@ -1,15 +1,31 @@
 import logging
-from dataclasses import dataclass
+import typing
+from dataclasses import dataclass, field
 from logging.handlers import RotatingFileHandler
 
 
-@dataclass
+@dataclass(slots=True)
 class StarrGuild:
     ident: int
     prefix: str
     star_channel: int | None = None
 
 
+@dataclass(slots=True)
+class GuildStore:
+    data: dict[int, StarrGuild] = field(default_factory=dict)
+
+    def get(self, ident: int) -> StarrGuild | None:
+        return self.data.get(ident)
+
+    def insert(self, ident: int, guild: StarrGuild) -> None:
+        self.data[ident] = guild
+
+    def __contains__(self, ident: int) -> bool:
+        return ident in self.data
+
+
+@dataclass(slots=True)
 class Logger:
 
     @classmethod

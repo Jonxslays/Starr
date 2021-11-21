@@ -139,15 +139,24 @@ pure25519 = "0.0.1"
 speedups = ["aiodns (==3.0.0)", "cchardet (==2.1.7)", "Brotli (==1.0.9)", "ciso8601 (==2.2.0)", "ed25519 (==1.5)"]
 
 [[package]]
-name = "hikari-lightbulb"
-version = "2.0.1"
-description = "A simple to use command handler for Hikari"
+name = "hikari-tanjun"
+version = "2.1.4a1"
+description = "A flexible command framework designed to extend Hikari."
 category = "main"
 optional = false
-python-versions = ">=3.8.0,<3.11"
+python-versions = ">=3.9.0,<3.12"
 
 [package.dependencies]
 hikari = ">=2.0.0.dev103,<2.1.0"
+
+[package.extras]
+docs = ["pdoc (==8.0.1)"]
+flake8 = ["flake8 (==4.0.1)", "flake8-bandit (==2.1.2)", "flake8-black (==0.2.3)", "flake8-broken-line (==0.4)", "flake8-builtins (==1.5.3)", "flake8-coding (==1.3.2)", "flake8-comprehensions (==3.7)", "flake8-deprecated (==1.3)", "flake8-executable (==2.1.1)", "flake8-fixme (==1.1.1)", "flake8-functions (==0.0.6)", "flake8-html (==0.4.1)", "flake8-if-statements (==0.1)", "flake8-isort (==4.1.1)", "flake8-mutable (==1.2)", "flake8-pep3101 (==1.3)", "flake8-print (==4)", "flake8-printf-formatting (==1.1.2)", "flake8-pytest-style (==1.5.1)", "flake8-raise (==0.0.5)"]
+lint = ["codespell (==2.1)"]
+publish = ["flit (==3.4)"]
+reformat = ["black (==21.10b0)", "isort (==5.10.1)"]
+tests = ["pytest (==6.2.5)", "pytest-asyncio (==0.16)", "pytest-cov (==3)"]
+type_checking = ["pyright (==0.0.12)"]
 
 [[package]]
 name = "idna"
@@ -276,7 +285,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "6827c123a19fe5399d72f48244cfe52b2fa8175d07f4886e05314f3a6353aa88"
+content-hash = "d7d21bd035680793dfac010e7cb9c4026c9ae0d47a8f407d8a118c488854fa65"
 
 [metadata.files]
 aiohttp = [
@@ -378,9 +387,9 @@ hikari = [
     {file = "hikari-2.0.0.dev103-py3-none-any.whl", hash = "sha256:b890b87f5207a7f2ef52613403f437142856500ca3a63eaf84e9b7547103838d"},
     {file = "hikari-2.0.0.dev103.tar.gz", hash = "sha256:710f3c8e79f94604f778d973cbe8c3a2e6c0a8873a237a143de539730d2006cf"},
 ]
-hikari-lightbulb = [
-    {file = "hikari-lightbulb-2.0.1.tar.gz", hash = "sha256:51f86b90613e3955d9f91e616c694b9f0b1d6f3ea231f0be897996bac03aa1ee"},
-    {file = "hikari_lightbulb-2.0.1-py3-none-any.whl", hash = "sha256:fa0ccaac800641849c79abe4409c705e88f6cae0c0ebfd5c8b8764e772e04c2a"},
+hikari-tanjun = [
+    {file = "hikari-tanjun-2.1.4a1.tar.gz", hash = "sha256:7c3b4a79b0160665f0eeca5da9f7a87edc199990e70a5399972e7835d8b7d0dd"},
+    {file = "hikari_tanjun-2.1.4a1-py3-none-any.whl", hash = "sha256:e7a01512f5eb6585dbb4b7a5f43f0bcf4b60628f73e790b5c46474144adcae3a"},
 ]
 idna = [
     {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},
