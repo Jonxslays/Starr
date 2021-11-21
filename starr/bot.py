@@ -5,8 +5,9 @@ import dotenv
 import hikari
 import tanjun
 
-from starr.config import GuildStore, Logger, StarrGuild
 from starr.db import Database
+from starr.logging import Logger
+from starr.models import GuildStore, StarrGuild
 
 dotenv.load_dotenv()
 

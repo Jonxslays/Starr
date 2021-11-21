@@ -1,7 +1,4 @@
-import logging
-import typing
 from dataclasses import dataclass, field
-from logging.handlers import RotatingFileHandler
 
 from starr.db import Database
 
@@ -38,29 +35,3 @@ class GuildStore:
 
     def __contains__(self, ident: int) -> bool:
         return ident in self.data
-
-
-@dataclass(slots=True)
-class Logger:
-
-    @classmethod
-    def setup(cls) -> logging.Logger:
-        log = logging.getLogger("root")
-        log.setLevel(logging.INFO)
-
-        rfh = RotatingFileHandler(
-            "./starr/data/logs/main.log",
-            maxBytes=512000,
-            encoding="utf-8",
-            backupCount=10,
-        )
-
-        ff = logging.Formatter(
-            f"[%(asctime)s] %(levelname)s ||| %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-
-        rfh.setFormatter(ff)
-        log.addHandler(rfh)
-
-        return log
