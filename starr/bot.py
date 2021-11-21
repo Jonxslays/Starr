@@ -61,10 +61,11 @@ class StarrBot(hikari.GatewayBot):
 
     async def on_guild_available(self, event: hikari.GuildAvailableEvent) -> None:
         if event.guild_id not in self.guilds:
-            await self.db.execute(
-                "INSERT INTO guilds (GuildID) VALUES ($1) ON CONFLICT DO NOTHING;", event.guild_id
-            )
+            await self.guilds.get_or_insert(event.guild_id, self.db)
 
     async def resolve_prefix(self, ctx: tanjun.MessageContext) -> tuple[str]:
-        # TODO: get prefixes from db
+        if ctx.guild_id:
+            guild = await self.guilds.get_or_insert(ctx.guild_id, self.db)
+            return guild.prefix,
+
         return "$",

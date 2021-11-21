@@ -3,6 +3,8 @@ import typing
 from dataclasses import dataclass, field
 from logging.handlers import RotatingFileHandler
 
+from starr.db import Database
+
 
 @dataclass(slots=True)
 class StarrGuild:
@@ -20,6 +22,20 @@ class GuildStore:
 
     def insert(self, ident: int, guild: StarrGuild) -> None:
         self.data[ident] = guild
+
+    async def get_or_insert(self, ident: int, db: Database) -> StarrGuild:
+        if not (starr_guild := self.get(ident)):
+            guild, prefix, channel = await db.row(
+                "INSERT INTO guilds (GuildID) VALUES ($1) "
+                "ON CONFLICT DO NOTHING "
+                "RETURNING GuildID, Prefix, StarChannel;",
+                ident,
+            )
+
+            starr_guild = StarrGuild(guild, prefix, channel)
+            self.insert(ident, starr_guild)
+
+        return starr_guild
 
     def __contains__(self, ident: int) -> bool:
         return ident in self.data
