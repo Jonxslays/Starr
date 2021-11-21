@@ -20,6 +20,7 @@ class StarrBot(hikari.GatewayBot):
         super().__init__(
             token=environ["TOKEN"],
             intents=(
+                hikari.Intents.GUILD_MESSAGE_REACTIONS |
                 hikari.Intents.GUILD_MESSAGES |
                 hikari.Intents.GUILD_MEMBERS |
                 hikari.Intents.GUILDS
@@ -55,7 +56,7 @@ class StarrBot(hikari.GatewayBot):
     async def on_started(self, _: hikari.StartedEvent) -> None:
         if data := await self.db.rows("SELECT GuildID, Prefix, StarChannel FROM guilds;"):
             for guild, prefix, channel in data:
-                self.guilds.insert(guild, StarrGuild(guild, prefix, channel))
+                self.guilds.insert(StarrGuild(guild, prefix, channel))
 
     async def on_stopping(self, _: hikari.StoppingEvent) -> None:
         await self.db.close()
@@ -70,7 +71,7 @@ class StarrBot(hikari.GatewayBot):
             )
 
             if data:
-                self.guilds.insert(event.guild_id, StarrGuild(*data))
+                self.guilds.insert(StarrGuild(*data))
 
     async def resolve_prefix(self, ctx: tanjun.MessageContext) -> tuple[str]:
         assert ctx.guild_id is not None
