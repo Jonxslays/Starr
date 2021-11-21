@@ -10,7 +10,8 @@ python = ">=3.10,<3.11"
 asyncpg = "^0.25.0"
 python-dotenv = "^0.19.2"
 hikari-tanjun = "^2.1.4-alpha.1"
-hikari = "^2.0.0-alpha.103"
+uvloop = "^0.16.0"
+hikari = {extras = ["speedups"], version = "^2.0.0-alpha.103"}
 
 [tool.poetry.dev-dependencies]
 black = "^21.11b1"
