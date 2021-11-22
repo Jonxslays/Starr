@@ -53,6 +53,59 @@ class StarboardMessage:
     reference_id: int
     guild: StarrGuild
 
+    async def db_insert(self, db: Database) -> None:
+        await db.execute(
+            "INSERT INTO starboard_messages (StarMessageID, ReferenceID) "
+            "VALUES ($1, $2) ON CONFLICT DO NOTHING;",
+            self.message_id,
+            self.reference_id,
+        )
+
+    async def db_update(self, db: Database) -> None:
+        await db.execute(
+            "DELETE FROM starboard_messages WHERE ReferenceID = $1",
+            self.reference_id
+        )
+        await db.execute(
+            "UPDATE starboard_messages SET StarMessageID = $1 WHERE ReferenceID = $2;",
+            self.message_id,
+            self.reference_id,
+        )
+
+    async def delete(
+        self,
+        rest: hikari.api.RESTClient,
+        db: Database,
+    ) -> None:
+
+        try:
+            await rest.delete_message(self.guild.star_channel, self.message_id)
+
+        except hikari.NotFoundError:
+            # The starboard message was already deleted.
+            pass
+
+        await db.execute("DELETE FROM starboard_messages WHERE StarMessageID = $1;", self.message_id)
+
+    async def update(
+        self,
+        rest: hikari.api.RESTClient,
+        db: Database,
+        message: hikari.Message,
+        count: int,
+        guild: StarrGuild,
+    ) -> None:
+        try:
+            message = await rest.fetch_message(guild.star_channel, self.message_id)
+
+        except hikari.NotFoundError:
+            message = await self.create_new(rest, db, message, count, guild)
+            self.message_id = message.id
+            await self.db_update(db)
+
+        else:
+            await message.edit(content=f"You're a ⭐ x{count}!\n")
+
     @classmethod
     async def from_reference(
         cls,
@@ -71,14 +124,6 @@ class StarboardMessage:
 
         return None
 
-    async def db_insert(self, db: Database) -> None:
-        await db.execute(
-            "INSERT INTO starboard_messages (StarMessageID, ReferenceID) "
-            "VALUES ($1, $2) ON CONFLICT DO NOTHING;",
-            self.message_id,
-            self.reference_id,
-        )
-
     @classmethod
     async def create_new(
         cls,
@@ -87,7 +132,7 @@ class StarboardMessage:
         message: hikari.Message,
         count: int,
         guild: StarrGuild,
-    ) -> None:
+    ) -> hikari.Message:
         content = f"You're a ⭐ x{count}!\n"
 
         embed = (
@@ -99,9 +144,10 @@ class StarboardMessage:
                 timestamp=message.timestamp,
             )
             .set_author(
-                name=message.author.username,
+                name=f"{message.author.username}#{message.author.discriminator}",
                 icon=message.author.avatar_url or message.author.default_avatar_url,
             )
+            .set_footer(text=f"ID: {message.id}")
         )
 
         if message.attachments:
@@ -115,3 +161,4 @@ class StarboardMessage:
 
         starboard_message = cls(new_message.id, message.id, guild)
         await starboard_message.db_insert(db)
+        return new_message

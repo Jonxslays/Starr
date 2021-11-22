@@ -6,12 +6,6 @@ CREATE TABLE IF NOT EXISTS guilds (
     Threshold INT DEFAULT 1
 );
 
-CREATE TABLE IF NOT EXISTS star_messages (
-    MessageID BIGINT NOT NULL PRIMARY KEY,
-    AuthorID BIGINT NOT NULL,
-    ChannelID BIGINT NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS starboard_messages (
     StarMessageID BIGINT NOT NULL PRIMARY KEY,
     ReferenceID BIGINT NOT NULL
