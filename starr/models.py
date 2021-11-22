@@ -133,8 +133,6 @@ class StarboardMessage:
         count: int,
         guild: StarrGuild,
     ) -> hikari.Message:
-        content = f"You're a ⭐ x{count}!\n"
-
         embed = (
             hikari.Embed(
                 title=f"Jump to message",
@@ -154,7 +152,7 @@ class StarboardMessage:
             embed.set_image(message.attachments[0])
 
         new_message = await rest.create_message(
-            content=content,
+            content=f"You're a ⭐ x{count}!\n",
             channel=guild.star_channel,
             embed=embed,
         )

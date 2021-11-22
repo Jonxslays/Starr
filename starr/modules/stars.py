@@ -38,8 +38,9 @@ async def get_reaction_event_info(
         # The message got deleted.
         return
 
+
     # The total number of star emojis.
-    count = sum(map(lambda r: r.emoji == bot.star, message.reactions))
+    count = sum(map(lambda r: r.count if r.emoji == bot.star else 0, message.reactions))
 
     return message, guild, count
 
@@ -69,16 +70,19 @@ async def handle_star_delete_event(
     guild: StarrGuild,
     count: int,
 ) -> None:
+
+    starboard_message = await StarboardMessage.from_reference(bot.db, message.id, guild)
+
+    if not starboard_message:
+        # This message is not in the database, and thus we can ignore it.
+        return
+
     if count < guild.threshold:
         # This message is no longer a star.
-        starboard_message = await StarboardMessage.from_reference(bot.db, message.id, guild)
-
-        if not starboard_message:
-            # This message is not in the database, and thus we can ignore it.
-            return
-
-        # Delete the starboard entry, and remove from the db.
         await starboard_message.delete(bot.rest, bot.db)
+
+    else:
+        await starboard_message.update(bot.rest, bot.db, message, count, guild)
 
 
 @stars.with_listener(hikari.GuildReactionAddEvent)
