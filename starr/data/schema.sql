@@ -1,5 +1,18 @@
 CREATE TABLE IF NOT EXISTS guilds (
-    GuildID bigint NOT NULL PRIMARY KEY,
-    Prefix text DEFAULT '$',
-    StarChannel bigint DEFAULT 0
+    GuildID BIGINT NOT NULL PRIMARY KEY,
+    Prefix TEXT DEFAULT '$',
+    StarChannel BIGINT DEFAULT 0,
+    Configured INT DEFAULT 0,
+    Threshold INT DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS star_messages (
+    MessageID BIGINT NOT NULL PRIMARY KEY,
+    AuthorID BIGINT NOT NULL,
+    ChannelID BIGINT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS starboard_messages (
+    StarMessageID BIGINT NOT NULL PRIMARY KEY,
+    ReferenceID BIGINT NOT NULL
 );

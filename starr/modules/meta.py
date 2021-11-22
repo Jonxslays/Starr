@@ -6,7 +6,7 @@ import tanjun
 from starr.bot import StarrBot
 
 
-meta = tanjun.Component(name="meta").add_check(tanjun.GuildCheck())
+meta = tanjun.Component(name="meta").add_check(tanjun.checks.GuildCheck())
 
 
 async def _ping(ctx: tanjun.abc.Context, bot: StarrBot) -> None:

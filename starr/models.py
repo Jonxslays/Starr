@@ -1,4 +1,4 @@
-import datetime
+from __future__ import annotations
 import typing
 from dataclasses import dataclass, field
 
@@ -11,8 +11,27 @@ from starr.db import Database
 class StarrGuild:
     guild_id: int
     prefix: str
-    star_channel: int | None = None
+    star_channel: int = 0
+    configured: int = 0
+    threshold: int = 1
 
+    @classmethod
+    async def from_db(cls, db: Database, guild_id: int) -> "StarrGuild":
+        data = await db.row("SELECT * FROM guilds WHERE GuildID = $1;", guild_id)
+        return cls(*data)
+
+    @classmethod
+    async def default_with_insert(cls, db: Database, guild_id: int) -> "StarrGuild":
+        data = await db.row(
+            "INSERT INTO guilds (GuildID) VALUES ($1) "
+            "ON CONFLICT DO NOTHING RETURNING *;",
+            guild_id
+        )
+
+        if not data:
+            return await cls.from_db(db, guild_id)
+
+        return cls(*data)
 
 @dataclass(slots=True)
 class GuildStore:
@@ -24,73 +43,75 @@ class GuildStore:
     def insert(self, guild: StarrGuild) -> None:
         self.data[guild.guild_id] = guild
 
-    async def get_or_insert(self, guild_id: int, db: Database) -> StarrGuild:
-        if not (starr_guild := self.get(guild_id)):
-            guild, prefix, channel = await db.row(
-                "INSERT INTO guilds (GuildID) VALUES ($1) "
-                "RETURNING GuildID, Prefix, StarChannel;",
-                guild_id,
-            )
-
-            starr_guild = StarrGuild(guild, prefix, channel)
-            self.insert(starr_guild)
-
-        return starr_guild
-
     def __contains__(self, guild_id: int) -> bool:
         return guild_id in self.data
 
 
 @dataclass(slots=True)
-class Starrer:
-    user_id: int
-    reactions: list[hikari.Reaction] = field(default_factory=list)
-
-    def sees_stars(self) -> bool:
-        return bool(self.reactions)
-
-    def add_star(self, reaction: hikari.Reaction) -> None:
-        self.reactions.append(reaction)
-
-    def rm_star(self, reaction: hikari.Reaction) -> None:
-        for i, r in enumerate(self.reactions):
-            if r.emoji == reaction.emoji:
-                self.reactions.pop(i)
-
-
-@dataclass(slots=True)
-class StarMessage:
+class StarboardMessage:
     message_id: int
-    guild_id: int
-    channel_id: int
-    author_id: int
-    timestamp: datetime.datetime
-    content: str | None
-    attachments: typing.Sequence[hikari.Attachment]
-    embeds: typing.Sequence[hikari.Embed]
-    reactions: typing.Sequence[hikari.Reaction]
-    stickers: typing.Sequence[hikari.PartialSticker]
-    starrers: dict[int, Starrer] = field(default_factory=dict)
+    reference_id: int
+    guild: StarrGuild
 
     @classmethod
-    def from_message(cls, message: hikari.Message) -> "StarMessage":
-        assert message.guild_id is not None
-
-        return cls(
-            message_id=message.id,
-            guild_id=message.guild_id,
-            channel_id=message.channel_id,
-            author_id=message.author.id,
-            timestamp=message.timestamp,
-            content=message.content,
-            attachments=message.attachments,
-            embeds=message.embeds,
-            reactions=message.reactions,
-            stickers=message.stickers,
+    async def from_reference(
+        cls,
+        db: Database,
+        reference_id: int,
+        guild: StarrGuild,
+    ) -> "StarboardMessage" | None:
+        data = await db.fetch(
+            "SELECT StarMessageID FROM starboard_messages "
+            "WHERE ReferenceID = $1",
+            reference_id,
         )
 
+        if data:
+            return cls(data, reference_id, guild)
 
-@dataclass(slots=True)
-class Starboard:
-    guild: StarrGuild
-    messages: dict[int, StarMessage] = field(default_factory=dict)
+        return None
+
+    async def db_insert(self, db: Database) -> None:
+        await db.execute(
+            "INSERT INTO starboard_messages (StarMessageID, ReferenceID) "
+            "VALUES ($1, $2) ON CONFLICT DO NOTHING;",
+            self.message_id,
+            self.reference_id,
+        )
+
+    @classmethod
+    async def create_new(
+        cls,
+        rest: hikari.api.RESTClient,
+        db: Database,
+        message: hikari.Message,
+        count: int,
+        guild: StarrGuild,
+    ) -> None:
+        content = f"You're a ⭐ x{count}!\n"
+
+        embed = (
+            hikari.Embed(
+                title=f"Jump to message",
+                url=message.make_link(guild.guild_id),
+                color=hikari.Color.from_hex_code("#fcd303"),
+                description=message.content,
+                timestamp=message.timestamp,
+            )
+            .set_author(
+                name=message.author.username,
+                icon=message.author.avatar_url or message.author.default_avatar_url,
+            )
+        )
+
+        if message.attachments:
+            embed.set_image(message.attachments[0])
+
+        new_message = await rest.create_message(
+            content=content,
+            channel=guild.star_channel,
+            embed=embed,
+        )
+
+        starboard_message = cls(new_message.id, message.id, guild)
+        await starboard_message.db_insert(db)
