@@ -2,7 +2,6 @@ import typing as t
 from os import environ
 from pathlib import Path
 
-import dotenv
 import hikari
 import tanjun
 
@@ -10,7 +9,7 @@ from starr.db import Database
 from starr.logging import Logger
 from starr.models import GuildStore, StarrGuild
 
-dotenv.load_dotenv()
+
 
 
 class StarrBot(hikari.GatewayBot):
@@ -47,7 +46,7 @@ class StarrBot(hikari.GatewayBot):
         ] = {
             hikari.StartingEvent: self.on_starting,
             hikari.StartedEvent: self.on_started,
-            hikari.StoppingEvent: self.on_stopping,
+            hikari.StoppedEvent: self.on_stopped,
             hikari.GuildAvailableEvent: self.on_guild_available,
             hikari.GuildJoinEvent: self.on_guild_available,
         }
@@ -63,7 +62,7 @@ class StarrBot(hikari.GatewayBot):
             for guild in data:
                 self.guilds.insert(StarrGuild(*guild))
 
-    async def on_stopping(self, _: hikari.StoppingEvent) -> None:
+    async def on_stopped(self, _: hikari.StoppingEvent) -> None:
         await self.db.close()
 
     async def on_guild_available(
@@ -78,6 +77,6 @@ class StarrBot(hikari.GatewayBot):
         assert ctx.guild_id is not None
 
         if guild := self.guilds.get(ctx.guild_id):
-            return guild.prefix,
+            return (guild.prefix,)
 
-        return "$",
+        return ("$",)
