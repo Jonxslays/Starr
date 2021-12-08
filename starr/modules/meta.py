@@ -14,7 +14,9 @@ async def _ping(ctx: tanjun.abc.Context, bot: StarrBot) -> None:
     message = await ctx.respond("uwu-owo", ensure_result=True)
     elapsed = time.perf_counter() - start
 
-    await message.edit(f"Gateway: {bot.heartbeat_latency * 1000:,.2f} ms\nRest: {elapsed * 1000:,.2f} ms")
+    await message.edit(
+        f"Gateway: {bot.heartbeat_latency * 1000:,.2f} ms\nRest: {elapsed * 1000:,.2f} ms"
+    )
 
 
 @meta.with_command

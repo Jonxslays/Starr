@@ -5,7 +5,6 @@ from logging.handlers import RotatingFileHandler
 
 @dataclass(slots=True)
 class Logger:
-
     @classmethod
     def setup(cls) -> logging.Logger:
         log = logging.getLogger("root")

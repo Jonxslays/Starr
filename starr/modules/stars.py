@@ -9,9 +9,9 @@ stars = tanjun.Component(name="stars").add_check(tanjun.checks.GuildCheck())
 
 
 async def get_reaction_event_info(
-    event: hikari.GuildReactionAddEvent |
-        hikari.GuildReactionDeleteEmojiEvent |
-        hikari.GuildReactionDeleteEvent,
+    event: hikari.GuildReactionAddEvent
+    | hikari.GuildReactionDeleteEmojiEvent
+    | hikari.GuildReactionDeleteEvent,
     bot: StarrBot,
 ) -> tuple[hikari.Message, StarrGuild, int] | None:
     if event.emoji_name != bot.star:
@@ -37,7 +37,6 @@ async def get_reaction_event_info(
     except hikari.NotFoundError:
         # The message got deleted.
         return
-
 
     # The total number of star emojis.
     count = sum(map(lambda r: r.count if r.emoji == bot.star else 0, message.reactions))
@@ -87,8 +86,7 @@ async def handle_star_delete_event(
 
 @stars.with_listener(hikari.GuildReactionAddEvent)
 async def on_reaction_add(
-    event: hikari.GuildReactionAddEvent,
-    bot: StarrBot = tanjun.inject(type=StarrBot)
+    event: hikari.GuildReactionAddEvent, bot: StarrBot = tanjun.inject(type=StarrBot)
 ) -> None:
     if not (event_data := await get_reaction_event_info(event, bot)):
         # If this returns None we don't care about the event.
@@ -100,8 +98,7 @@ async def on_reaction_add(
 
 @stars.with_listener(hikari.GuildReactionDeleteEvent)
 async def on_reaction_delete(
-    event: hikari.GuildReactionDeleteEvent,
-    bot: StarrBot = tanjun.inject(type=StarrBot)
+    event: hikari.GuildReactionDeleteEvent, bot: StarrBot = tanjun.inject(type=StarrBot)
 ) -> None:
     if not (event_data := await get_reaction_event_info(event, bot)):
         # If this returns None we don't care about the event.
@@ -113,8 +110,7 @@ async def on_reaction_delete(
 
 @stars.with_listener(hikari.GuildReactionDeleteEmojiEvent)
 async def on_reaction_emoji_delete(
-    event: hikari.GuildReactionDeleteEmojiEvent,
-    bot: StarrBot = tanjun.inject(type=StarrBot)
+    event: hikari.GuildReactionDeleteEmojiEvent, bot: StarrBot = tanjun.inject(type=StarrBot)
 ) -> None:
     if not (event_data := await get_reaction_event_info(event, bot)):
         # If this returns None we don't care about the event.

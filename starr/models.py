@@ -23,15 +23,15 @@ class StarrGuild:
     @classmethod
     async def default_with_insert(cls, db: Database, guild_id: int) -> "StarrGuild":
         data = await db.row(
-            "INSERT INTO guilds (GuildID) VALUES ($1) "
-            "ON CONFLICT DO NOTHING RETURNING *;",
-            guild_id
+            "INSERT INTO guilds (GuildID) VALUES ($1) " "ON CONFLICT DO NOTHING RETURNING *;",
+            guild_id,
         )
 
         if not data:
             return await cls.from_db(db, guild_id)
 
         return cls(*data)
+
 
 @dataclass(slots=True)
 class GuildStore:
@@ -63,8 +63,7 @@ class StarboardMessage:
 
     async def db_update(self, db: Database) -> None:
         await db.execute(
-            "DELETE FROM starboard_messages WHERE ReferenceID = $1",
-            self.reference_id
+            "DELETE FROM starboard_messages WHERE ReferenceID = $1", self.reference_id
         )
         await db.execute(
             "UPDATE starboard_messages SET StarMessageID = $1 WHERE ReferenceID = $2;",
@@ -85,7 +84,9 @@ class StarboardMessage:
             # The starboard message was already deleted.
             pass
 
-        await db.execute("DELETE FROM starboard_messages WHERE StarMessageID = $1;", self.message_id)
+        await db.execute(
+            "DELETE FROM starboard_messages WHERE StarMessageID = $1;", self.message_id
+        )
 
     async def update(
         self,
@@ -104,7 +105,7 @@ class StarboardMessage:
             await self.db_update(db)
 
         else:
-            await message.edit(content=f"You're a ⭐ x{count}!\n")
+            await message.edit(content=f"You're a \u2B50 x{count}!\n")
 
     @classmethod
     async def from_reference(
@@ -112,10 +113,9 @@ class StarboardMessage:
         db: Database,
         reference_id: int,
         guild: StarrGuild,
-    ) -> "StarboardMessage" | None:
+    ) -> StarboardMessage | None:
         data = await db.fetch(
-            "SELECT StarMessageID FROM starboard_messages "
-            "WHERE ReferenceID = $1",
+            "SELECT StarMessageID FROM starboard_messages " "WHERE ReferenceID = $1",
             reference_id,
         )
 
@@ -152,7 +152,7 @@ class StarboardMessage:
             embed.set_image(message.attachments[0])
 
         new_message = await rest.create_message(
-            content=f"You're a ⭐ x{count}!\n",
+            content=f"You're a \u2B50 x{count}!\n",
             channel=guild.star_channel,
             embed=embed,
         )

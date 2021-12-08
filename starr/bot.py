@@ -10,8 +10,6 @@ from starr.logging import Logger
 from starr.models import GuildStore, StarrGuild
 
 
-
-
 class StarrBot(hikari.GatewayBot):
 
     __slots__ = ("star", "db", "guilds", "log", "client")
@@ -20,14 +18,14 @@ class StarrBot(hikari.GatewayBot):
         super().__init__(
             token=environ["TOKEN"],
             intents=(
-                hikari.Intents.GUILD_MESSAGE_REACTIONS |
-                hikari.Intents.GUILD_MESSAGES |
-                hikari.Intents.GUILD_MEMBERS |
-                hikari.Intents.GUILDS
-            )
+                hikari.Intents.GUILD_MESSAGE_REACTIONS
+                | hikari.Intents.GUILD_MESSAGES
+                | hikari.Intents.GUILD_MEMBERS
+                | hikari.Intents.GUILDS
+            ),
         )
 
-        self.star = "⭐"
+        self.star = "\u2B50"
         self.db = Database()
         self.guilds = GuildStore()
         self.log = Logger.setup()
@@ -66,8 +64,7 @@ class StarrBot(hikari.GatewayBot):
         await self.db.close()
 
     async def on_guild_available(
-        self,
-        event: hikari.GuildAvailableEvent | hikari.GuildJoinEvent
+        self, event: hikari.GuildAvailableEvent | hikari.GuildJoinEvent
     ) -> None:
         if event.guild_id not in self.guilds:
             guild = await StarrGuild.default_with_insert(self.db, event.guild_id)
