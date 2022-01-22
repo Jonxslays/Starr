@@ -42,6 +42,7 @@ def get_dependencies() -> dict[str, str]:
         data = toml.loads(f.read())["tool"]["poetry"]
         deps = data["dev-dependencies"]
         deps.update(data["dependencies"])
+        deps["hikari"] = deps["hikari"]["version"]
 
     return dict((k.lower(), f"{k}{v}") for k, v in deps.items())
 
@@ -51,7 +52,14 @@ DEPS = get_dependencies()
 
 @nox.session(reuse_venv=True)
 def types(session: nox.Session) -> None:
-    session.install("-U", DEPS["pyright"], DEPS["mypy"], DEPS["hikari"], DEPS["hikari-tanjun"])
+    session.install(
+        "-U",
+        DEPS["pyright"],
+        DEPS["mypy"],
+        DEPS["hikari"],
+        DEPS["hikari-tanjun"],
+        DEPS["python-dotenv"],
+    )
     session.run("mypy", "starr")
     session.run("pyright")
 

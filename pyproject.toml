@@ -5,13 +5,17 @@ description = "A sparkly bot designed with Hikari."
 authors = ["Jonxslays"]
 readme = "README.md"
 
+
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
 asyncpg = "~=0.25.0"
 python-dotenv = "~=0.19.2"
-hikari-tanjun = "~=2.3.0-alpha.1"
+hikari-tanjun = "~=2.3.0.a1"
 uvloop = "~=0.16.0"
-hikari = { extras = ["speedups"], version = "~=2.0.0.dev105" }
+
+[tool.poetry.dependencies.hikari]
+version = "~=2.0.0.dev105"
+extras = ["speedups"]
 
 [tool.poetry.dev-dependencies]
 black = "~=21.12b0"
