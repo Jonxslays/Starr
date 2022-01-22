@@ -1,3 +1,3 @@
 # Starr
 
-A dedicated Starboard bot written using Hikari.
+A sparkly bot designed with Hikari.
