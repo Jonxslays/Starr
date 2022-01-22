@@ -122,7 +122,7 @@ async def on_reaction_add(
 ) -> None:
     if not (event_data := await get_reaction_event_info(event, bot)):
         # If this returns None we don't care about the event.
-        return
+        return None
 
     message, guild, count = event_data
     await handle_star_add_event(bot, message, guild, count)
@@ -134,7 +134,7 @@ async def on_reaction_delete(
 ) -> None:
     if not (event_data := await get_reaction_event_info(event, bot)):
         # If this returns None we don't care about the event.
-        return
+        return None
 
     message, guild, count = event_data
     await handle_star_delete_event(bot, message, guild, count)
@@ -146,10 +146,13 @@ async def on_reaction_emoji_delete(
 ) -> None:
     if not (event_data := await get_reaction_event_info(event, bot)):
         # If this returns None we don't care about the event.
-        return
+        return None
 
     message, guild, count = event_data
     await handle_star_delete_event(bot, message, guild, count)
+
+
+# TODO: add the rest of the reaction events
 
 
 @tanjun.as_loader
