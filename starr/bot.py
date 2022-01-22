@@ -103,4 +103,4 @@ class StarrBot(hikari.GatewayBot):
         if guild := self.guilds.get(ctx.guild_id):
             return (guild.prefix,)
 
-        return ("$",)
+        return ("./",)
