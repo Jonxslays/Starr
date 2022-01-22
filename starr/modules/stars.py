@@ -16,7 +16,7 @@ async def get_reaction_event_info(
 ) -> tuple[hikari.Message, StarrGuild, int] | None:
     if event.emoji_name != bot.star:
         # Ignore non star emojis
-        return
+        return None
 
     if not (guild := bot.guilds.get(event.guild_id)):
         # Grab the guild from cache, or construct it from the db
@@ -24,8 +24,8 @@ async def get_reaction_event_info(
         guild = await StarrGuild.from_db(bot.db, event.guild_id)
 
     if not guild.configured:
-        # The guild hasnt configured their starboard yet.
-        return
+        # The guild hasn't configured their starboard yet.
+        return None
 
     try:
         message = await bot.rest.fetch_message(event.channel_id, event.message_id)
@@ -36,7 +36,7 @@ async def get_reaction_event_info(
         # reaction will get counted.
     except hikari.NotFoundError:
         # The message got deleted.
-        return
+        return None
 
     # The total number of star emojis.
     count = sum(map(lambda r: r.count if r.emoji == bot.star else 0, message.reactions))

@@ -6,8 +6,9 @@ import hikari
 import tanjun
 
 from starr.db import Database
-from starr.logging import Logger
-from starr.models import GuildStore, StarrGuild
+from starr.models import StarrGuild
+
+SubscriptionsT = dict[t.Type[hikari.Event], t.Callable[...,  t.Coroutine[t.Any, t.Any, None]]]
 
 
 class StarrBot(hikari.GatewayBot):
@@ -17,31 +18,23 @@ class StarrBot(hikari.GatewayBot):
     def __init__(self) -> None:
         super().__init__(
             token=environ["TOKEN"],
-            intents=(
-                hikari.Intents.GUILD_MESSAGE_REACTIONS
-                | hikari.Intents.GUILD_MESSAGES
-                | hikari.Intents.GUILD_MEMBERS
-                | hikari.Intents.GUILDS
-            ),
+            intents=hikari.Intents.ALL,
         )
 
         self.star = "\u2B50"
         self.db = Database()
-        self.guilds = GuildStore()
-        self.log = Logger.setup()
+        self.guilds: dict[int, StarrGuild] = {}
         self.client = (
             tanjun.Client.from_gateway_bot(
                 self,
                 mention_prefix=True,
-                declare_global_commands=int(environ.get("DEV", 0)) or True,
+                declare_global_commands=int(environ.get("DEV", environ["PROD"])),
             )
             .set_prefix_getter(self.resolve_prefix)
-            .load_modules(*Path("./starr/modules").glob("*.py"))
+            .load_modules(*Path("./starr/modules").glob("[!_]*.py"))
         )
 
-        subscriptions: dict[
-            t.Type[hikari.Event], t.Callable[[t.Any], t.Coroutine[t.Any, t.Any, None]]
-        ] = {
+        subscriptions: SubscriptionsT = {
             hikari.StartingEvent: self.on_starting,
             hikari.StartedEvent: self.on_started,
             hikari.StoppedEvent: self.on_stopped,
@@ -58,7 +51,8 @@ class StarrBot(hikari.GatewayBot):
     async def on_started(self, _: hikari.StartedEvent) -> None:
         if data := await self.db.rows("SELECT * FROM guilds;"):
             for guild in data:
-                self.guilds.insert(StarrGuild(*guild))
+                obj = StarrGuild(*guild)
+                self.guilds[obj.guild_id] = obj
 
     async def on_stopped(self, _: hikari.StoppingEvent) -> None:
         await self.db.close()
@@ -68,9 +62,9 @@ class StarrBot(hikari.GatewayBot):
     ) -> None:
         if event.guild_id not in self.guilds:
             guild = await StarrGuild.default_with_insert(self.db, event.guild_id)
-            self.guilds.insert(guild)
+            self.guilds[guild.guild_id] = guild
 
-    async def resolve_prefix(self, ctx: tanjun.MessageContext) -> tuple[str]:
+    async def resolve_prefix(self, ctx: tanjun.context.MessageContext) -> tuple[str]:
         assert ctx.guild_id is not None
 
         if guild := self.guilds.get(ctx.guild_id):

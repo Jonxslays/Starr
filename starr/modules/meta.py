@@ -1,6 +1,5 @@
 import time as time
 
-import hikari
 import tanjun
 
 from starr.bot import StarrBot
@@ -11,7 +10,7 @@ meta = tanjun.Component(name="meta").add_check(tanjun.checks.GuildCheck())
 
 async def _ping(ctx: tanjun.abc.Context, bot: StarrBot) -> None:
     start = time.perf_counter()
-    message = await ctx.respond("uwu-owo", ensure_result=True)
+    message = await ctx.respond(".", ensure_result=True)
     elapsed = time.perf_counter() - start
 
     await message.edit(

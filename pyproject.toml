@@ -1,24 +1,40 @@
 [tool.poetry]
 name = "starr"
-version = "0.1.0"
-description = "A dedicated Starboard bot written using Hikari."
+version = "0.2.0"
+description = "A sparkly bot designed with Hikari."
 authors = ["Jonxslays"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
-asyncpg = "^0.25.0"
-python-dotenv = "^0.19.2"
-hikari-tanjun = "^2.2.1-alpha.1"
-uvloop = "^0.16.0"
-hikari = {extras = ["speedups"], version = "^2.0.0-alpha.104"}
+asyncpg = "~=0.25.0"
+python-dotenv = "~=0.19.2"
+hikari-tanjun = "~=2.3.0-alpha.1"
+uvloop = "~=0.16.0"
+hikari = { extras = ["speedups"], version = "~=2.0.0.dev105" }
 
 [tool.poetry.dev-dependencies]
-black = "^21.12b0"
-mypy = "^0.910"
+black = "~=21.12b0"
+mypy = "~=0.910"
+nox = "~=2022.1.7"
+pyright = "~=0.0.13"
+len8 = "~=0.7.0"
+flake8 = "~=4.0.1"
+isort = "~=5.10.1"
+toml = "~=0.10.2"
 
 [tool.black]
 line-length = 99
+exclude = ["stubs"]
+
+[tool.isort]
+profile = "black"
+
+[tool.len8]
+include = ["starr", "noxfile.py"]
+code-length = 99
+docs-length = 72
+strict = true
 
 [tool.mypy]
 strict = true
@@ -26,6 +42,11 @@ strict = true
 [[tool.mypy.overrides]]
 module = "asyncpg"
 ignore_missing_imports = true
+
+[tool.pyright]
+include = ["starr"]
+ignore = ["starr/db.py"]
+typeCheckingMode = "strict"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

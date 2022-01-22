@@ -1,8 +1,6 @@
 import hikari
 import tanjun
 
-from starr.bot import StarrBot
-
 
 admin = (
     tanjun.Component(name="admin")

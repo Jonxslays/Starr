@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import functools
 import typing as t
@@ -35,11 +37,12 @@ class Database:
         """Closes the connection pool."""
         await self.pool.close()
 
-    def with_connection(func: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:  # type: ignore
+    @staticmethod
+    def with_connection(func: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
         """A decorator used to acquire a connection from the pool."""
 
         @functools.wraps(func)
-        async def wrapper(self: "Database", *args: t.Any) -> t.Any:
+        async def wrapper(self: Database, *args: t.Any) -> t.Any:
             async with self.pool.acquire() as conn:
                 self.calls += 1
                 return await func(self, *args, conn=conn)
@@ -47,7 +50,7 @@ class Database:
         return wrapper
 
     @with_connection
-    async def fetch(self, q: str, *values: t.Any, conn: asyncpg.Connection) -> t.Optional[t.Any]:
+    async def fetch(self, q: str, *values: tuple[t.Any], conn: asyncpg.Connection) -> t.Any | None:
         """Read 1 field of applicable data."""
         query = await conn.prepare(q)
         return await query.fetchval(*values)
