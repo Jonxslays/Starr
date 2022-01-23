@@ -46,7 +46,7 @@ SubscriptionsT = dict[t.Type[hikari.Event], t.Callable[...,  t.Coroutine[t.Any, 
 
 class StarrBot(hikari.GatewayBot):
 
-    __slots__ = ("star", "db", "guilds", "log", "client")
+    __slots__ = ("star", "db", "guilds", "log", "client", "my_id")
 
     def __init__(self) -> None:
         super().__init__(
@@ -86,6 +86,9 @@ class StarrBot(hikari.GatewayBot):
             for guild in data:
                 obj = StarrGuild(*guild)
                 self.guilds[obj.guild_id] = obj
+
+        assert (me := self.get_me()) is not None
+        self.my_id = me.id
 
     async def on_stopped(self, _: hikari.StoppingEvent) -> None:
         await self.db.close()

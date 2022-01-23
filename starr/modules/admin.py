@@ -44,6 +44,10 @@ admin = (
     .add_check(tanjun.checks.AuthorPermissionCheck(hikari.Permissions.ADMINISTRATOR))
 )
 
+########################################################################
+# START CONFIG
+########################################################################
+
 config = admin.with_slash_command(
     tanjun.slash_command_group("config", "Starr configuration options.")
 )
@@ -118,6 +122,69 @@ async def configure_prefix_cmd(
     guild.prefix = value
 
     await ctx.respond(f"Successfully updated message command prefix to `{value}`")
+
+########################################################################
+# END CONFIG
+########################################################################
+
+@admin.with_command
+@tanjun.with_str_slash_option("reason", "The optional reason to add to the audit log.", default="")
+@tanjun.with_member_slash_option("member", "The member to kick.")
+@tanjun.as_slash_command("kick", "Kick a member from the guild.", always_defer=True)
+async def kick_slash_cmd(
+    ctx: tanjun.abc.SlashContext,
+    member: hikari.Member,
+    reason: str,
+    bot: StarrBot = tanjun.inject(type=StarrBot),
+) -> None:
+    assert ctx.guild_id is not None
+
+    try:
+        await bot.rest.kick_member(ctx.guild_id, member, reason=reason)
+    except hikari.ForbiddenError:
+        await ctx.respond(
+            f"Unable to kick <@!{member.id}>, I don't have the kick members permission."
+        )
+    else:
+        await ctx.respond(f"Successfully kicked <@!{member.id}>.")
+
+
+@admin.with_command
+@tanjun.with_int_slash_option(
+    "delete_message_days",
+    "The number of days to delete messages from this user.",
+    default=0,
+    min_value=0,
+    max_value=7,
+)
+@tanjun.with_str_slash_option("reason", "The optional reason to add to the audit log.", default="")
+@tanjun.with_member_slash_option("member", "The member to ban.")
+@tanjun.as_slash_command("kick", "Ban a member from the guild.", always_defer=True)
+async def ban_slash_cmd(
+    ctx: tanjun.abc.SlashContext,
+    member: hikari.Member,
+    reason: str,
+    delete_message_days: int,
+    bot: StarrBot = tanjun.inject(type=StarrBot),
+) -> None:
+    assert ctx.guild_id is not None
+
+    try:
+        await bot.rest.ban_member(
+            ctx.guild_id, member, delete_message_days=delete_message_days, reason=reason
+        )
+    except hikari.ForbiddenError:
+        message = f"Unable to ban <@!{member.id}>, I don't have the ban members permission."
+
+    else:
+        message = f"Successfully banned <@!{member.id}>"
+
+        if delete_message_days:
+            message += f"and deleted their messages from the past {delete_message_days} days."
+        else:
+            message += "."
+
+    await ctx.respond(message)
 
 
 @tanjun.as_loader
