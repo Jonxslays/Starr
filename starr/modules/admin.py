@@ -159,7 +159,7 @@ async def kick_slash_cmd(
 )
 @tanjun.with_str_slash_option("reason", "The optional reason to add to the audit log.", default="")
 @tanjun.with_member_slash_option("member", "The member to ban.")
-@tanjun.as_slash_command("kick", "Ban a member from the guild.", always_defer=True)
+@tanjun.as_slash_command("ban", "Ban a member from the guild.", always_defer=True)
 async def ban_slash_cmd(
     ctx: tanjun.abc.SlashContext,
     member: hikari.Member,
@@ -177,12 +177,10 @@ async def ban_slash_cmd(
         message = f"Unable to ban <@!{member.id}>, I don't have the ban members permission."
 
     else:
-        message = f"Successfully banned <@!{member.id}>"
-
-        if delete_message_days:
-            message += f"and deleted their messages from the past {delete_message_days} days."
-        else:
-            message += "."
+        message = f"Successfully banned <@!{member.id}>" + (
+            f", and deleted their messages from the past {delete_message_days} days."
+            if delete_message_days else "."
+        )
 
     await ctx.respond(message)
 
