@@ -31,9 +31,12 @@
 
 from __future__ import annotations
 
+import datetime
 import time
 
+import hikari
 import tanjun
+from tanjun.conversion import from_datetime
 
 from starr.bot import StarrBot
 
@@ -50,6 +53,62 @@ async def ping(ctx: tanjun.abc.Context, bot: StarrBot = tanjun.inject(type=Starr
     await message.edit(
         f"Gateway: {bot.heartbeat_latency * 1000:,.2f} ms\nRest: {elapsed * 1000:,.2f} ms"
     )
+
+
+@meta.with_command
+@tanjun.with_member_slash_option("member", "The member to get information on.")
+@tanjun.as_slash_command("userinfo", "Get information about a member.", always_defer=True)
+async def user_info_slash_cmd(
+    ctx: tanjun.abc.SlashContext,
+    member: hikari.Member,
+) -> None:
+    if role := member.get_top_role():
+        color = role.color
+    else:
+        color = hikari.Color(0x31a6e0)
+
+    e = (
+        hikari.Embed(
+            title=f"User info for {member}",
+            description=f"ID: {member.id}",
+            color=color,
+            timestamp=datetime.datetime.now(datetime.timezone.utc),
+        )
+        .set_thumbnail(member.avatar_url or member.default_avatar_url)
+        .set_image(member.banner_url)
+        .add_field(
+            "Created on",
+            from_datetime(member.created_at) +
+            f" ({from_datetime(member.created_at, style='R')})",
+        )
+        .add_field(
+            "Joined on",
+            from_datetime(member.joined_at) +
+            f" ({from_datetime(member.joined_at, style='R')})",
+        )
+        .add_field(
+            "Roles",
+            ", ".join(
+                r.mention for r in (member.get_roles() or await member.fetch_roles())
+                if "everyone" not in r.name
+            )
+        )
+    )
+
+    if presence := member.get_presence():
+        if presence.activities:
+            activity = presence.activities[0]
+            activity_type = hikari.ActivityType(activity.type).name.title()
+
+            e.add_field(
+                "Activity",
+                f"{'' if 'custom' in activity_type else activity_type + ' '}{activity.name}",
+                inline=True,
+            )
+
+        e.add_field("Status", presence.visible_status, inline=True)
+
+    await ctx.respond(e)
 
 
 @tanjun.as_loader
