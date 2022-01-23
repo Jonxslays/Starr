@@ -58,19 +58,25 @@ config = admin.with_slash_command(
     "channel", "Sets the starboard channel.", types=(hikari.GuildTextChannel,), default=None
 )
 @tanjun.as_slash_command("starboard", "Configures Starr for this guild.")
-async def configure_slash_cmd(
+async def configure_starboard_cmd(
     ctx: tanjun.abc.SlashContext,
     threshold: int,
     channel: hikari.InteractionChannel | None,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
+    assert ctx.guild_id is not None
+
     updates: list[tuple[t.Any, ...]] = []
     responses: list[str] = []
 
     if channel:
+        guild = bot.guilds[ctx.guild_id]
+        guild.configured = 1
+        guild.star_channel = channel.id
+
         updates.append(
             (
-                "UPDATE guilds SET StarChannel = $1 WHERE GuildID = $2;",
+                "UPDATE guilds SET StarChannel = $1, Configured = 1 WHERE GuildID = $2;",
                 channel.id,
                 ctx.guild_id,
             )
@@ -94,6 +100,23 @@ async def configure_slash_cmd(
         await ctx.respond("\n".join(responses))
     else:
         await ctx.respond("Nothing happened...")
+
+
+@config.with_command
+@tanjun.with_str_slash_option("value", "The new prefix to set.")
+@tanjun.as_slash_command("prefix", "Configures message command prefix for this guild.")
+async def configure_prefix_cmd(
+    ctx: tanjun.abc.SlashContext,
+    value: str,
+    bot: StarrBot = tanjun.inject(type=StarrBot),
+) -> None:
+    assert ctx.guild_id is not None
+    await bot.db.fetch_row("UPDATE guilds SET Prefix = $1 WHERE GuildID = $2;", value, ctx.guild_id)
+
+    guild = bot.guilds[ctx.guild_id]
+    guild.prefix = value
+
+    await ctx.respond(f"Successfully updated message command prefix to `{value}`")
 
 
 @tanjun.as_loader

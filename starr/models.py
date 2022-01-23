@@ -62,13 +62,25 @@ class StarrGuild:
     def prefix(self) -> str:
         return self._prefix
 
+    @prefix.setter
+    def prefix(self, value: str) -> None:
+        self._prefix = value
+
     @property
     def star_channel(self) -> int:
         return self._star_channel
 
+    @star_channel.setter
+    def star_channel(self, value: int) -> None:
+        self._star_channel = value
+
     @property
     def configured(self) -> int:
         return self._configured
+
+    @configured.setter
+    def configured(self, value: int) -> None:
+        self._configured = value
 
     @property
     def threshold(self) -> int:
