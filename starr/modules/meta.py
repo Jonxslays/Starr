@@ -35,13 +35,13 @@ import time
 
 import tanjun
 
-from starr import utils
 from starr.bot import StarrBot
 
 meta = tanjun.Component(name="meta").add_check(tanjun.checks.GuildCheck())
 
 
-@utils.as_both_commands(meta, "ping", "Starr's latency.")
+@meta.with_command
+@tanjun.as_slash_command("ping", "Returns Starr's latency.")
 async def ping(ctx: tanjun.abc.Context, bot: StarrBot = tanjun.inject(type=StarrBot)) -> None:
     start = time.perf_counter()
     message = await ctx.respond(".", ensure_result=True)
