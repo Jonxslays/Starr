@@ -126,7 +126,7 @@ async def configure_prefix_cmd(
     guild = bot.guilds[ctx.guild_id]
     guild.prefix = value
 
-    await ctx.respond(f"Successfully updated message command prefix to `{value}`")
+    await ctx.respond(f"Successfully updated message command prefix to `{value}`.")
 
 ########################################################################
 # END CONFIG
