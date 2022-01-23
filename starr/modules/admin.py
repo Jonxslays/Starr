@@ -257,8 +257,14 @@ async def hackban_slash_cmd(
     delete_message_days: int,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
-    message = await _ban_member(ctx, member, reason, delete_message_days, bot)
-    await ctx.respond(message.replace("banned", "hackbanned"))
+    try:
+        message = await _ban_member(ctx, member, reason, delete_message_days, bot)
+    except hikari.NotFoundError:
+        message = f"Hackban failed - invalid user ID: {member}."
+    else:
+        message = message.replace("banned", "hackbanned")
+
+    await ctx.respond(message)
 
 
 @tanjun.as_loader
