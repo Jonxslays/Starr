@@ -106,7 +106,7 @@ async def user_info_slash_cmd(
                 inline=True,
             )
 
-        e.add_field("Status", presence.visible_status, inline=True)
+        e.add_field("Status", str(presence.visible_status), inline=True)
 
     await ctx.respond(e)
 

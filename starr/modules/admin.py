@@ -157,12 +157,13 @@ async def kick_slash_cmd(
 
 async def _ban_member(
     ctx: tanjun.abc.SlashContext,
-    member: hikari.Member,
+    member: hikari.Member | int,
     reason: str,
     delete_message_days: int,
     bot: StarrBot,
 ) -> str:
     assert ctx.guild_id is not None
+    member = member if isinstance(member, int) else member.id
 
     try:
         await bot.rest.ban_member(
@@ -172,12 +173,12 @@ async def _ban_member(
         )
     except hikari.ForbiddenError:
         message = (
-            f"Unable to ban <@!{member.id}>, "
+            f"Unable to ban <@!{member}>, "
             "I am missing permissions or my top role is too low."
         )
 
     else:
-        message = f"Successfully banned <@!{member.id}>" + (
+        message = f"Successfully banned <@!{member}>" + (
             f", and deleted their messages from the past {delete_message_days} days."
             if delete_message_days else "."
         )
@@ -234,6 +235,28 @@ async def softban_slash_cmd(
     )
 
     await ctx.respond(message.replace("banned", "softbanned"))
+
+
+@admin.with_command
+@tanjun.with_int_slash_option(
+    "delete_message_days",
+    "The number of days to delete messages from this member.",
+    default=0,
+    min_value=0,
+    max_value=7,
+)
+@tanjun.with_str_slash_option("reason", "The optional reason to add to the audit log.", default="")
+@tanjun.with_int_slash_option("member", "The member to ban's Snowflake ID.")
+@tanjun.as_slash_command("hackban", "Ban a member from the guild by ID.", always_defer=True)
+async def hackban_slash_cmd(
+    ctx: tanjun.abc.SlashContext,
+    member: int,
+    reason: str,
+    delete_message_days: int,
+    bot: StarrBot = tanjun.inject(type=StarrBot),
+) -> None:
+    message = await _ban_member(ctx, member, reason, delete_message_days, bot)
+    await ctx.respond(message.replace("banned", "hackbanned"))
 
 
 @tanjun.as_loader
