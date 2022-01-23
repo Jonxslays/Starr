@@ -54,7 +54,7 @@ tags_component = tanjun.Component(name="tags").set_hooks(ErrorHooks)
 @tanjun.with_parser
 @tanjun.as_message_command_group("tag")
 async def tag_group(
-    ctx: tanjun.abc.Context,
+    ctx: tanjun.abc.MessageContext,
     name: str,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
@@ -75,7 +75,7 @@ async def tag_group(
 @tanjun.with_parser
 @tanjun.as_message_command("info")
 async def tag_info_command(
-    ctx: tanjun.abc.Context,
+    ctx: tanjun.abc.MessageContext,
     name:str,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
@@ -101,7 +101,7 @@ async def tag_info_command(
 @tag_group.with_command
 @tanjun.as_message_command("list")
 async def tag_list_command(
-    ctx: tanjun.abc.Context,
+    ctx: tanjun.abc.MessageContext,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
     """List this guilds tags."""
@@ -132,7 +132,7 @@ async def tag_list_command(
 @tanjun.with_parser
 @tanjun.as_message_command("create")
 async def tag_create_slash_command(
-    ctx: tanjun.abc.Context,
+    ctx: tanjun.abc.MessageContext,
     name: str,
     content: str,
     bot: StarrBot = tanjun.inject(type=StarrBot),
@@ -175,7 +175,7 @@ async def tag_create_slash_command(
 @tanjun.with_parser
 @tanjun.as_message_command("edit",)
 async def tag_edit_command(
-    ctx: tanjun.abc.Context,
+    ctx: tanjun.abc.MessageContext,
     name: str,
     content: str,
     bot: StarrBot = tanjun.inject(type=StarrBot),
@@ -262,7 +262,7 @@ async def tag_edit_command(
 @tanjun.with_parser
 @tanjun.as_message_command("transfer")
 async def tag_transfer_command(
-    ctx: tanjun.abc.Context,
+    ctx: tanjun.abc.MessageContext,
     name: str,
     member: int,
     bot: StarrBot = tanjun.inject(type=StarrBot),
@@ -301,7 +301,7 @@ async def tag_transfer_command(
 @tanjun.with_parser
 @tanjun.as_message_command("delete")
 async def tag_delete_slash_command(
-    ctx: tanjun.abc.Context,
+    ctx: tanjun.abc.MessageContext,
     name: str,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:

@@ -89,11 +89,11 @@ ErrorHooks = tanjun.AnyHooks()
 async def on_error(ctx: tanjun.abc.Context, error: Exception) -> bool:
 
     if isinstance(error, hikari.HikariError):
-        description = f"A Hikari exception occurred:\n```{error}```"
+        description = f"**{type(error).__name__}**:```{error}```"
         result = True
 
     else:
-        description = f"An unknown exception occurred: ```{error}```"
+        description = f"**{type(error).__name__}**:```{error}```"
         result = False
 
     await ctx.respond(
