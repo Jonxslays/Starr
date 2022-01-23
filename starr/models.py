@@ -175,7 +175,7 @@ class StarboardMessage:
         guild: StarrGuild,
     ) -> StarboardMessage | None:
         data = await db.fetch_one(
-            "SELECT StarMessageID FROM starboard_messages " "WHERE ReferenceID = $1",
+            "SELECT StarMessageID FROM starboard_messages WHERE ReferenceID = $1",
             reference_id,
         )
 

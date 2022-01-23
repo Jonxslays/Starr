@@ -101,7 +101,6 @@ async def handle_star_delete_event(
     guild: StarrGuild,
     count: int,
 ) -> None:
-
     starboard_message = await StarboardMessage.from_reference(bot.db, message.id, guild)
 
     if not starboard_message:
@@ -113,6 +112,7 @@ async def handle_star_delete_event(
         await starboard_message.delete(bot.rest, bot.db)
 
     else:
+        # This is an existing starboard entry, and still a star!
         await starboard_message.update(bot.rest, bot.db, message, count, guild)
 
 
@@ -152,7 +152,26 @@ async def on_reaction_emoji_delete(
     await handle_star_delete_event(bot, message, guild, count)
 
 
-# TODO: add the rest of the reaction events
+@stars.with_listener(hikari.GuildReactionDeleteAllEvent)
+async def on_reaction_delete_all(
+    event: hikari.GuildReactionDeleteAllEvent, bot: StarrBot = tanjun.inject(type=StarrBot)
+) -> None:
+    if not (guild := bot.guilds.get(event.guild_id)):
+        # Grab the guild from cache, or construct it from the db
+        # if not cached.
+        guild = await StarrGuild.from_db(bot.db, event.guild_id)
+
+    if not guild.configured:
+        # The guild hasn't configured their starboard yet.
+        return None
+
+    message = await StarboardMessage.from_reference(bot.db, event.message_id, guild)
+
+    # Delete message from db and starboard, it has no more reactions.
+    return await message.delete(bot.rest, bot.db) if message else None
+
+
+# TODO: add message delete event
 
 
 @tanjun.as_loader

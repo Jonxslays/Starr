@@ -44,7 +44,7 @@ def get_dependencies() -> dict[str, str]:
         deps.update(data["dependencies"])
         deps["hikari"] = deps["hikari"]["version"]
 
-    return dict((k.lower(), f"{k}{v}") for k, v in deps.items())
+    return dict((k.lower(), f"{k + v}") for k, v in deps.items())
 
 
 DEPS = get_dependencies()
