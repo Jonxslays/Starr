@@ -157,13 +157,13 @@ async def kick_slash_cmd(
 
 async def _ban_member(
     ctx: tanjun.abc.SlashContext,
-    member: hikari.Member | int,
+    member: hikari.SnowflakeishOr[hikari.Member],
     reason: str,
     delete_message_days: int,
     bot: StarrBot,
 ) -> str:
     assert ctx.guild_id is not None
-    member = member if isinstance(member, int) else member.id
+    member = member.id if isinstance(member, hikari.Member) else member
 
     try:
         await bot.rest.ban_member(
@@ -246,11 +246,13 @@ async def softban_slash_cmd(
     max_value=7,
 )
 @tanjun.with_str_slash_option("reason", "The optional reason to add to the audit log.", default="")
-@tanjun.with_int_slash_option("member", "The member to ban's Snowflake ID.")
+@tanjun.with_str_slash_option(
+    "member", "The member to ban's Snowflake ID.", converters=tanjun.to_snowflake
+)
 @tanjun.as_slash_command("hackban", "Ban a member from the guild by ID.", always_defer=True)
 async def hackban_slash_cmd(
     ctx: tanjun.abc.SlashContext,
-    member: int,
+    member: hikari.Snowflake,
     reason: str,
     delete_message_days: int,
     bot: StarrBot = tanjun.inject(type=StarrBot),
