@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS guilds (
     GuildID BIGINT NOT NULL PRIMARY KEY,
     Prefix TEXT DEFAULT './',
     StarChannel BIGINT DEFAULT 0,
-    Configured INT DEFAULT 0,
+    StarsConfigured INT DEFAULT 0,
     Threshold INT DEFAULT 5
 );
 

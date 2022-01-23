@@ -55,7 +55,7 @@ async def get_reaction_event_info(
         # if not cached.
         guild = await StarrGuild.from_db(bot.db, event.guild_id)
 
-    if not guild.configured:
+    if not guild.stars_configured:
         # The guild hasn't configured their starboard yet.
         return None
 
@@ -136,7 +136,7 @@ async def handle_guaranteed_delete(
         # if not cached.
         guild = await StarrGuild.from_db(bot.db, event.guild_id)
 
-    if not guild.configured:
+    if not guild.stars_configured:
         # The guild hasn't configured their starboard yet.
         return None
 

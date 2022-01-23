@@ -71,12 +71,12 @@ async def configure_starboard_cmd(
 
     if channel:
         guild = bot.guilds[ctx.guild_id]
-        guild.configured = 1
+        guild.stars_configured = 1
         guild.star_channel = channel.id
 
         updates.append(
             (
-                "UPDATE guilds SET StarChannel = $1, Configured = 1 WHERE GuildID = $2;",
+                "UPDATE guilds SET StarChannel = $1, StarsConfigured = 1 WHERE GuildID = $2;",
                 channel.id,
                 ctx.guild_id,
             )

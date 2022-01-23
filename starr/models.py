@@ -38,20 +38,20 @@ from starr.db import Database
 
 class StarrGuild:
 
-    __slots__ = ("_guild_id", "_prefix", "_star_channel", "_configured", "_threshold")
+    __slots__ = ("_guild_id", "_prefix", "_star_channel", "_stars_configured", "_threshold")
 
     def __init__(
         self,
         guild_id: int,
         prefix: str,
         star_channel: int = 0,
-        configured: int = 0,
+        stars_configured: int = 0,
         threshold: int = 5,
     ) -> None:
         self._guild_id = guild_id
         self._prefix = prefix
         self._star_channel = star_channel
-        self._configured = configured
+        self._stars_configured = stars_configured
         self._threshold = threshold
 
     @property
@@ -75,12 +75,12 @@ class StarrGuild:
         self._star_channel = value
 
     @property
-    def configured(self) -> int:
-        return self._configured
+    def stars_configured(self) -> int:
+        return self._stars_configured
 
-    @configured.setter
-    def configured(self, value: int) -> None:
-        self._configured = value
+    @stars_configured.setter
+    def stars_configured(self, value: int) -> None:
+        self._stars_configured = value
 
     @property
     def threshold(self) -> int:
