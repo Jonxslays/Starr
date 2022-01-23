@@ -76,12 +76,12 @@ class StarrGuild:
 
     @classmethod
     async def from_db(cls, db: Database, guild_id: int) -> StarrGuild:
-        data = await db.row("SELECT * FROM guilds WHERE GuildID = $1;", guild_id)
+        data = await db.fetch_row("SELECT * FROM guilds WHERE GuildID = $1;", guild_id)
         return cls(*data)
 
     @classmethod
     async def default_with_insert(cls, db: Database, guild_id: int) -> StarrGuild:
-        data = await db.row(
+        data = await db.fetch_row(
             "INSERT INTO guilds (GuildID) VALUES ($1) ON CONFLICT DO NOTHING RETURNING *;",
             guild_id,
         )
@@ -174,7 +174,7 @@ class StarboardMessage:
         reference_id: int,
         guild: StarrGuild,
     ) -> StarboardMessage | None:
-        data = await db.fetch(
+        data = await db.fetch_one(
             "SELECT StarMessageID FROM starboard_messages " "WHERE ReferenceID = $1",
             reference_id,
         )

@@ -81,13 +81,13 @@ class Database:
         return wrapper
 
     @with_connection
-    async def fetch(self, q: str, *values: tuple[t.Any], conn: asyncpg.Connection) -> t.Any | None:
+    async def fetch_one(self, q: str, *values: tuple[t.Any], conn: asyncpg.Connection) -> t.Any | None:
         """Read 1 field of applicable data."""
         query = await conn.prepare(q)
         return await query.fetchval(*values)
 
     @with_connection
-    async def row(
+    async def fetch_row(
         self, q: str, *values: t.Any, conn: asyncpg.Connection
     ) -> t.Optional[t.List[t.Any]]:
         """Read 1 row of applicable data."""
@@ -98,7 +98,7 @@ class Database:
         return None
 
     @with_connection
-    async def rows(
+    async def fetch_rows(
         self, q: str, *values: t.Any, conn: asyncpg.Connection
     ) -> t.Optional[t.List[t.Iterable[t.Any]]]:
         """Read all rows of applicable data."""
@@ -109,7 +109,7 @@ class Database:
         return None
 
     @with_connection
-    async def column(self, q: str, *values: t.Any, conn: asyncpg.Connection) -> t.List[t.Any]:
+    async def fetch_column(self, q: str, *values: t.Any, conn: asyncpg.Connection) -> t.List[t.Any]:
         """Read a single column of applicable data."""
         query = await conn.prepare(q)
         return [r[0] for r in await query.fetch(*values)]

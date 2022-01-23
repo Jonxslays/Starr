@@ -82,7 +82,7 @@ class StarrBot(hikari.GatewayBot):
         await self.db.connect()
 
     async def on_started(self, _: hikari.StartedEvent) -> None:
-        if data := await self.db.rows("SELECT * FROM guilds;"):
+        if data := await self.db.fetch_rows("SELECT * FROM guilds;"):
             for guild in data:
                 obj = StarrGuild(*guild)
                 self.guilds[obj.guild_id] = obj
