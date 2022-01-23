@@ -149,10 +149,37 @@ async def kick_slash_cmd(
         await ctx.respond(f"Successfully kicked <@!{member.id}>.")
 
 
+async def _ban_member(
+    ctx: tanjun.abc.SlashContext,
+    member: hikari.Member,
+    reason: str,
+    delete_message_days: int,
+    bot: StarrBot,
+) -> str:
+    assert ctx.guild_id is not None
+
+    try:
+        await bot.rest.ban_member(
+            ctx.guild_id, member,
+            delete_message_days=delete_message_days,
+            reason=reason + f" - banned by {ctx.author.username}"
+        )
+    except hikari.ForbiddenError:
+        message = f"Unable to ban <@!{member.id}>, I don't have the ban members permission."
+
+    else:
+        message = f"Successfully banned <@!{member.id}>" + (
+            f", and deleted their messages from the past {delete_message_days} days."
+            if delete_message_days else "."
+        )
+
+    return message
+
+
 @admin.with_command
 @tanjun.with_int_slash_option(
     "delete_message_days",
-    "The number of days to delete messages from this user.",
+    "The number of days to delete messages from this member.",
     default=0,
     min_value=0,
     max_value=7,
@@ -167,22 +194,37 @@ async def ban_slash_cmd(
     delete_message_days: int,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
+    await ctx.respond(await _ban_member(ctx, member, reason, delete_message_days, bot))
+
+
+@admin.with_command
+@tanjun.with_int_slash_option(
+    "delete_message_days",
+    "The number of days to delete messages from this member.",
+    default=0,
+    min_value=0,
+    max_value=7,
+)
+@tanjun.with_str_slash_option("reason", "The optional reason to add to the audit log.", default="")
+@tanjun.with_member_slash_option("member", "The member to softban.")
+@tanjun.as_slash_command(
+    "softban", "Ban a member from the guild, and immediately unban them.", always_defer=True
+)
+async def softban_slash_cmd(
+    ctx: tanjun.abc.SlashContext,
+    member: hikari.Member,
+    reason: str,
+    delete_message_days: int,
+    bot: StarrBot = tanjun.inject(type=StarrBot),
+) -> None:
     assert ctx.guild_id is not None
 
-    try:
-        await bot.rest.ban_member(
-            ctx.guild_id, member, delete_message_days=delete_message_days, reason=reason
-        )
-    except hikari.ForbiddenError:
-        message = f"Unable to ban <@!{member.id}>, I don't have the ban members permission."
+    message = await _ban_member(ctx, member, reason, delete_message_days, bot)
+    await bot.rest.unban_member(
+        ctx.guild_id, member, reason=f"softban release by {ctx.author.username}"
+    )
 
-    else:
-        message = f"Successfully banned <@!{member.id}>" + (
-            f", and deleted their messages from the past {delete_message_days} days."
-            if delete_message_days else "."
-        )
-
-    await ctx.respond(message)
+    await ctx.respond(message.replace("banned", "softbanned"))
 
 
 @tanjun.as_loader
