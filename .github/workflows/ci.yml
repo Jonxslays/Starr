@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - task/**
+      - hotfix/**
+      - bugfix/**
+  pull_request:
+
+jobs:
+  lint-and-format:
+    name: Lint
+    strategy:
+      fail-fast: false
+      matrix:
+        session: [types, formatting, imports, licensing]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install python 3.10
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+
+      - name: Install poetry
+        uses: Gr1N/setup-poetry@v7
+
+      - name: Lint and format
+        run: |
+          pip install --upgrade pip
+          poetry install -q
+          poetry run nox -s ${{ matrix.session }}
