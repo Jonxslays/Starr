@@ -31,8 +31,12 @@
 
 from __future__ import annotations
 
+import functools
 import logging
+import typing as t
 from logging.handlers import RotatingFileHandler
+
+import tanjun
 
 
 def configure_logging() -> None:
@@ -53,3 +57,24 @@ def configure_logging() -> None:
 
     rfh.setFormatter(ff)
     log.addHandler(rfh)
+
+
+def as_both_commands(
+    component: tanjun.Component, *argv: t.Any, **kwargv: t.Any
+)-> t.Callable[[t.Callable[..., t.Any]], tanjun.commands.BaseSlashCommand]:
+
+    def inner(func: t.Callable[..., t.Any]) -> tanjun.commands.BaseSlashCommand:
+
+        @component.with_message_command
+        @tanjun.as_message_command(*argv, **kwargv)
+        @functools.wraps(func)
+        async def wrapper(
+            *args: t.Any, **kwargs: t.Any
+        ) -> t.Any:
+            return await func(*args, **kwargs)
+
+        return component.with_slash_command(
+            tanjun.as_slash_command(*argv, **kwargv)(wrapper)  # type: ignore
+        )
+
+    return inner

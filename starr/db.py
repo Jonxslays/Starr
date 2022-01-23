@@ -81,7 +81,9 @@ class Database:
         return wrapper
 
     @with_connection
-    async def fetch_one(self, q: str, *values: tuple[t.Any], conn: asyncpg.Connection) -> t.Any | None:
+    async def fetch_one(
+        self, q: str, *values: tuple[t.Any], conn: asyncpg.Connection
+    ) -> t.Any | None:
         """Read 1 field of applicable data."""
         query = await conn.prepare(q)
         return await query.fetchval(*values)
@@ -109,7 +111,9 @@ class Database:
         return None
 
     @with_connection
-    async def fetch_column(self, q: str, *values: t.Any, conn: asyncpg.Connection) -> t.List[t.Any]:
+    async def fetch_column(
+        self, q: str, *values: t.Any, conn: asyncpg.Connection
+    ) -> t.List[t.Any]:
         """Read a single column of applicable data."""
         query = await conn.prepare(q)
         return [r[0] for r in await query.fetch(*values)]
