@@ -69,16 +69,11 @@ class StarrBot(hikari.GatewayBot):
             .load_modules(*Path("./starr/modules").glob("[!_]*.py"))
         )
 
-        subscriptions: SubscriptionsT = {
-            hikari.StartingEvent: self.on_starting,
-            hikari.StartedEvent: self.on_started,
-            hikari.StoppedEvent: self.on_stopped,
-            hikari.GuildAvailableEvent: self.on_guild_available,
-            hikari.GuildJoinEvent: self.on_guild_available,
-        }
-
-        for event, callback in subscriptions.items():
-            self.subscribe(event, callback)
+        self.subscribe(hikari.StartingEvent, self.on_starting)
+        self.subscribe(hikari.StartedEvent, self.on_started)
+        self.subscribe(hikari.StoppedEvent, self.on_stopped)
+        self.subscribe(hikari.GuildAvailableEvent, self.on_guild_available)
+        self.subscribe(hikari.GuildJoinEvent, self.on_guild_available)
 
     async def on_starting(self, _: hikari.StartingEvent) -> None:
         await self.db.connect()
