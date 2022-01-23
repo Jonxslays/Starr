@@ -41,7 +41,12 @@ from starr.bot import StarrBot
 admin = (
     tanjun.Component(name="admin")
     .add_check(tanjun.checks.GuildCheck())
-    .add_check(tanjun.checks.AuthorPermissionCheck(hikari.Permissions.ADMINISTRATOR))
+    .add_check(
+        tanjun.checks.AuthorPermissionCheck(
+            hikari.Permissions.ADMINISTRATOR,
+            error_message="You're not allowed to do that.",
+        )
+    )
 )
 
 ########################################################################
@@ -143,7 +148,8 @@ async def kick_slash_cmd(
         await bot.rest.kick_member(ctx.guild_id, member, reason=reason)
     except hikari.ForbiddenError:
         await ctx.respond(
-            f"Unable to kick <@!{member.id}>, I don't have the kick members permission."
+            f"Unable to kick <@!{member.id}>, "
+            "I am missing permissions or my top role is too low."
         )
     else:
         await ctx.respond(f"Successfully kicked <@!{member.id}>.")
@@ -165,7 +171,10 @@ async def _ban_member(
             reason=reason + f" - banned by {ctx.author.username}"
         )
     except hikari.ForbiddenError:
-        message = f"Unable to ban <@!{member.id}>, I don't have the ban members permission."
+        message = (
+            f"Unable to ban <@!{member.id}>, "
+            "I am missing permissions or my top role is too low."
+        )
 
     else:
         message = f"Successfully banned <@!{member.id}>" + (
