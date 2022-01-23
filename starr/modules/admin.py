@@ -38,7 +38,6 @@ import tanjun
 
 from starr.bot import StarrBot
 
-
 admin = (
     tanjun.Component(name="admin")
     .add_check(tanjun.checks.GuildCheck())
@@ -111,7 +110,9 @@ async def configure_prefix_cmd(
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
     assert ctx.guild_id is not None
-    await bot.db.fetch_row("UPDATE guilds SET Prefix = $1 WHERE GuildID = $2;", value, ctx.guild_id)
+    await bot.db.fetch_row(
+        "UPDATE guilds SET Prefix = $1 WHERE GuildID = $2;", value, ctx.guild_id
+    )
 
     guild = bot.guilds[ctx.guild_id]
     guild.prefix = value
