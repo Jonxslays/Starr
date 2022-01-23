@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS guilds (
     Prefix TEXT DEFAULT './',
     StarChannel BIGINT DEFAULT 0,
     Configured INT DEFAULT 0,
-    Threshold INT DEFAULT 1
+    Threshold INT DEFAULT 5
 );
 
 CREATE TABLE IF NOT EXISTS starboard_messages (

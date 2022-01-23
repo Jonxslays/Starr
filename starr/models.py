@@ -46,7 +46,7 @@ class StarrGuild:
         prefix: str,
         star_channel: int = 0,
         configured: int = 0,
-        threshold: int = 1,
+        threshold: int = 5,
     ) -> None:
         self._guild_id = guild_id
         self._prefix = prefix
