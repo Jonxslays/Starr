@@ -31,11 +31,13 @@
 
 from __future__ import annotations
 
+import datetime
 import functools
 import logging
 import typing as t
 from logging.handlers import RotatingFileHandler
 
+import hikari
 import tanjun
 
 
@@ -78,3 +80,29 @@ def as_both_commands(
         )
 
     return inner
+
+
+ErrorHooks = tanjun.AnyHooks()
+
+
+@ErrorHooks.with_on_error
+async def on_error(ctx: tanjun.abc.Context, error: Exception) -> bool:
+
+    if isinstance(error, hikari.HikariError):
+        description = f"A Hikari exception occurred:\n```{error}```"
+        result = True
+
+    else:
+        description = f"An unknown exception occurred: ```{error}```"
+        result = False
+
+    await ctx.respond(
+        hikari.Embed(
+            title="Exception event",
+            description=description,
+            color=hikari.Color(0xf00a0a),
+            timestamp=datetime.datetime.now(datetime.timezone.utc),
+        )
+    )
+
+    return result
