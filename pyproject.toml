@@ -1,10 +1,12 @@
 [tool.poetry]
 name = "starr"
-version = "0.2.0"
+version = "0.3.0"
 description = "A sparkly bot designed with Hikari."
+homepage = "https://github.com/Jonxslays/Starr"
+repository = "https://github.com/Jonxslays/Starr"
 authors = ["Jonxslays"]
 readme = "README.md"
-
+license = "BSD-3-Clause"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
