@@ -10,3 +10,12 @@ CREATE TABLE IF NOT EXISTS starboard_messages (
     StarMessageID BIGINT NOT NULL PRIMARY KEY,
     ReferenceID BIGINT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS tags (
+    GuildID bigint,
+    TagOwner bigint,
+    TagName text,
+    TagContent text,
+    Uses bigint DEFAULT 0,
+    PRIMARY KEY (GuildID, TagName)
+);
