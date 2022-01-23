@@ -31,14 +31,69 @@
 
 from __future__ import annotations
 
+import typing as t
+
 import hikari
 import tanjun
+
+from starr.bot import StarrBot
+
 
 admin = (
     tanjun.Component(name="admin")
     .add_check(tanjun.checks.GuildCheck())
     .add_check(tanjun.checks.AuthorPermissionCheck(hikari.Permissions.ADMINISTRATOR))
 )
+
+config = admin.with_slash_command(
+    tanjun.slash_command_group("config", "Starr configuration options.")
+)
+
+
+@config.with_command
+@tanjun.with_int_slash_option(
+    "threshold", "Sets the number of stars a message must receive.", default=0, min_value=1
+)
+@tanjun.with_channel_slash_option(
+    "channel", "Sets the starboard channel.", types=(hikari.GuildTextChannel,), default=None
+)
+@tanjun.as_slash_command("starboard", "Configures Starr for this guild.")
+async def configure_slash_cmd(
+    ctx: tanjun.abc.SlashContext,
+    threshold: int,
+    channel: hikari.InteractionChannel | None,
+    bot: StarrBot = tanjun.inject(type=StarrBot),
+) -> None:
+    updates: list[tuple[t.Any, ...]] = []
+    responses: list[str] = []
+
+    if channel:
+        updates.append(
+            (
+                "UPDATE guilds SET StarChannel = $1 WHERE GuildID = $2;",
+                channel.id,
+                ctx.guild_id,
+            )
+        )
+        responses.append(f"Successfully updated starboard channel to <#{channel.id}>.")
+
+    if threshold:
+        updates.append(
+            (
+                "UPDATE guilds SET Threshold = $1 WHERE GuildID = $2;",
+                threshold,
+                ctx.guild_id,
+            )
+        )
+        responses.append(f"Successfully updated starboard star threshold to {threshold}.")
+
+    for update in updates:
+        await bot.db.execute(*update)
+
+    if responses:
+        await ctx.respond("\n".join(responses))
+    else:
+        await ctx.respond("Nothing happened...")
 
 
 @tanjun.as_loader

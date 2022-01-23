@@ -65,7 +65,7 @@ def as_both_commands(
 
     def inner(func: t.Callable[..., t.Any]) -> tanjun.commands.BaseSlashCommand:
 
-        @component.with_message_command
+        @component.with_command
         @tanjun.as_message_command(*argv, **kwargv)
         @functools.wraps(func)
         async def wrapper(
@@ -73,7 +73,7 @@ def as_both_commands(
         ) -> t.Any:
             return await func(*args, **kwargs)
 
-        return component.with_slash_command(
+        return component.with_command(
             tanjun.as_slash_command(*argv, **kwargv)(wrapper)  # type: ignore
         )
 
