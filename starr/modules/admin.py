@@ -40,7 +40,6 @@ from starr.bot import StarrBot
 
 admin = (
     tanjun.Component(name="admin")
-    .add_check(tanjun.checks.GuildCheck())
     .add_check(
         tanjun.checks.AuthorPermissionCheck(
             hikari.Permissions.ADMINISTRATOR,

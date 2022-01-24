@@ -35,7 +35,6 @@ import hikari
 import tanjun
 
 from starr.bot import StarrBot
-from starr.utils import ErrorHooks
 
 RESERVED_TAGS = (
     "create",
@@ -46,7 +45,7 @@ RESERVED_TAGS = (
     "transfer",
 )
 
-tags_component = tanjun.Component(name="tags").set_hooks(ErrorHooks)
+tags_component = tanjun.Component(name="tags")
 
 
 @tags_component.with_command

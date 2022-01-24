@@ -32,55 +32,11 @@
 from __future__ import annotations
 
 import datetime
-import functools
 import logging
-import typing as t
 from logging.handlers import RotatingFileHandler
 
 import hikari
 import tanjun
-
-
-def configure_logging() -> None:
-    log = logging.getLogger("root")
-    log.setLevel(logging.INFO)
-
-    rfh = RotatingFileHandler(
-        "./starr/data/logs/main.log",
-        maxBytes=521288, # 512KB
-        encoding="utf-8",
-        backupCount=10,
-    )
-
-    ff = logging.Formatter(
-        f"[%(asctime)s] %(levelname)s ||| %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-
-    rfh.setFormatter(ff)
-    log.addHandler(rfh)
-
-
-def as_both_commands(
-    component: tanjun.Component, *argv: t.Any, **kwargv: t.Any
-)-> t.Callable[[t.Callable[..., t.Any]], tanjun.commands.BaseSlashCommand]:
-
-    def inner(func: t.Callable[..., t.Any]) -> tanjun.commands.BaseSlashCommand:
-
-        @component.with_command
-        @tanjun.as_message_command(*argv, **kwargv)
-        @functools.wraps(func)
-        async def wrapper(
-            *args: t.Any, **kwargs: t.Any
-        ) -> t.Any:
-            return await func(*args, **kwargs)
-
-        return component.with_command(
-            tanjun.as_slash_command(*argv, **kwargv)(wrapper)  # type: ignore
-        )
-
-    return inner
-
 
 ErrorHooks = tanjun.AnyHooks()
 
@@ -106,3 +62,23 @@ async def on_error(ctx: tanjun.abc.Context, error: Exception) -> bool:
     )
 
     return result
+
+
+def configure_logging() -> None:
+    log = logging.getLogger("root")
+    log.setLevel(logging.INFO)
+
+    rfh = RotatingFileHandler(
+        "./starr/data/logs/main.log",
+        maxBytes=521288, # 512KB
+        encoding="utf-8",
+        backupCount=10,
+    )
+
+    ff = logging.Formatter(
+        f"[%(asctime)s] %(levelname)s ||| %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    rfh.setFormatter(ff)
+    log.addHandler(rfh)

@@ -40,12 +40,15 @@ from tanjun.conversion import from_datetime
 
 from starr.bot import StarrBot
 
-meta = tanjun.Component(name="meta").add_check(tanjun.checks.GuildCheck())
+meta = tanjun.Component(name="meta")
 
 
 @meta.with_command
-@tanjun.as_slash_command("ping", "Returns Starr's latency.")
-async def ping(ctx: tanjun.abc.Context, bot: StarrBot = tanjun.inject(type=StarrBot)) -> None:
+@tanjun.as_message_command("ping")
+async def ping(
+    ctx: tanjun.abc.MessageContext, bot: StarrBot = tanjun.inject(type=StarrBot)
+) -> None:
+    """Returns Starr's latency."""
     start = time.perf_counter()
     message = await ctx.respond(".", ensure_result=True)
     elapsed = time.perf_counter() - start
@@ -54,14 +57,20 @@ async def ping(ctx: tanjun.abc.Context, bot: StarrBot = tanjun.inject(type=Starr
         f"Gateway: {bot.heartbeat_latency * 1000:,.2f} ms\nRest: {elapsed * 1000:,.2f} ms"
     )
 
+# Cool way to transform the message command into a slash command.
+meta.with_command(tanjun.SlashCommand(ping.callback, "ping", "Returns Starr's latency."))
 
-@meta.with_command
-@tanjun.with_member_slash_option("member", "The member to get information on.")
-@tanjun.as_slash_command("userinfo", "Get information about a member.", always_defer=True)
-async def user_info_slash_cmd(
+
+async def _user_info(
     ctx: tanjun.abc.SlashContext,
-    member: hikari.Member,
+    member: hikari.Member | int,
+    bot: StarrBot,
 ) -> None:
+    assert ctx.guild_id is not None
+
+    if isinstance(member, int):
+        member = await bot.getch_member(ctx.guild_id, member)
+
     if role := member.get_top_role():
         color = role.color
     else:
@@ -110,6 +119,29 @@ async def user_info_slash_cmd(
 
     await ctx.respond(e)
 
+
+@meta.with_command
+@tanjun.with_argument("member", converters=int)
+@tanjun.with_parser
+@tanjun.as_message_command("userinfo")
+async def user_info_cmd(
+    ctx: tanjun.abc.SlashContext,
+    member: int,
+    bot: StarrBot = tanjun.inject(type=StarrBot),
+) -> None:
+    """Get information about a user."""
+    await _user_info(ctx, member, bot)
+
+
+@meta.with_command
+@tanjun.with_member_slash_option("member", "The member to get information about.")
+@tanjun.as_slash_command("userinfo", "Get information about a user.")
+async def user_info_slash_cmd(
+    ctx: tanjun.abc.SlashContext,
+    member: hikari.Member,
+    bot: StarrBot = tanjun.inject(type=StarrBot),
+) -> None:
+    await _user_info(ctx, member, bot)
 
 @tanjun.as_loader
 def load_component(client: tanjun.Client) -> None:

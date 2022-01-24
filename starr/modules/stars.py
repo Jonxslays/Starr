@@ -37,7 +37,7 @@ import tanjun
 from starr.bot import StarrBot
 from starr.models import StarboardMessage, StarrGuild
 
-stars = tanjun.Component(name="stars").add_check(tanjun.checks.GuildCheck())
+stars = tanjun.Component(name="stars")
 
 
 async def get_reaction_event_info(

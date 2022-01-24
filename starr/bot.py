@@ -65,6 +65,7 @@ class StarrBot(hikari.GatewayBot):
                 declare_global_commands=int(environ.get("DEV", environ["PROD"])),
             )
             .set_hooks(ErrorHooks)
+            .add_check(tanjun.checks.GuildCheck())
             .set_prefix_getter(self.resolve_prefix)
             .load_modules(*Path("./starr/modules").glob("[!_]*.py"))
         )
@@ -74,6 +75,11 @@ class StarrBot(hikari.GatewayBot):
         self.subscribe(hikari.StoppedEvent, self.on_stopped)
         self.subscribe(hikari.GuildAvailableEvent, self.on_guild_available)
         self.subscribe(hikari.GuildJoinEvent, self.on_guild_available)
+
+    async def getch_member(self, guild_id: int, member_id: int) -> hikari.Member:
+        return self.cache.get_member(
+            guild_id, member_id
+        ) or await self.rest.fetch_member(guild_id, member_id)
 
     async def on_starting(self, _: hikari.StartingEvent) -> None:
         await self.db.connect()
