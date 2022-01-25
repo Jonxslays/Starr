@@ -22,6 +22,8 @@ services:
     depends_on:
       - starr-db
     command: poetry run python -m starr
+    networks:
+      - private
 
 networks:
   private:
