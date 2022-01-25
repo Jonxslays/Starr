@@ -1,7 +1,7 @@
 services:
 
-  db:
-    container_name: db
+  starr-db:
+    container_name: starr-db
     image: postgres:13.4-alpine
     restart: always
     environment:
@@ -15,12 +15,12 @@ services:
     networks:
       - private
 
-  app:
-    container_name: app
+  starr-app:
+    container_name: starr-app
     restart: always
     build: .
     depends_on:
-      - db
+      - starr-db
     command: poetry run python -m starr
 
 networks:
