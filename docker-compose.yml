@@ -1,0 +1,31 @@
+services:
+
+  db:
+    container_name: db
+    image: postgres:13.4-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: $PG_USER
+      POSTGRES_PASSWORD: $PG_PASS
+      POSTGRES_DB: $PG_DB
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - $PG_PORT:$PG_PORT
+    networks:
+      - private
+
+  app:
+    container_name: app
+    restart: always
+    build: .
+    depends_on:
+      - db
+    command: poetry run python -m starr
+
+networks:
+  private:
+    external: false
+
+volumes:
+  postgres_data:
