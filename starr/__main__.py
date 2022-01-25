@@ -34,7 +34,7 @@ from __future__ import annotations
 import hikari
 from dotenv import load_dotenv
 
-from starr import __version__, utils
+from starr import utils
 from starr.bot import StarrBot
 
 if __name__ == "__main__":
