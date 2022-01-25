@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+import typing as t
 from logging.handlers import RotatingFileHandler
 
 import hikari
@@ -62,6 +63,21 @@ async def on_error(ctx: tanjun.abc.Context, error: Exception) -> bool:
     )
 
     return result
+
+
+CommandT = t.TypeVar("CommandT", bound=tanjun.abc.ExecutableCommand[t.Any])
+
+def with_help(
+    help_text: str, *, args: tuple[str, ...] = (), usage: str = ""
+) -> t.Callable[[CommandT], CommandT]:
+
+    def inner(command: CommandT) -> CommandT:
+        command.metadata["help"] = help_text
+        command.metadata["args"] = "\n\n".join(args)
+        command.metadata["usage"] = "\n" + usage
+        return command
+
+    return inner
 
 
 def configure_logging() -> None:

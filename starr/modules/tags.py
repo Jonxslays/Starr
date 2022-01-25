@@ -34,6 +34,7 @@ from __future__ import annotations
 import hikari
 import tanjun
 
+from starr import utils
 from starr.bot import StarrBot
 
 RESERVED_TAGS = (
@@ -49,15 +50,19 @@ tags_component = tanjun.Component(name="tags")
 
 
 @tags_component.with_command
-@tanjun.with_argument("name")
+@tanjun.with_greedy_argument("name")
 @tanjun.with_parser
+@utils.with_help(
+    "Get a tag or use a tag subcommand.",
+    args=("name (str): The name of the tag or subcommand.",),
+    usage="tag list\ntag jax is cute",
+)
 @tanjun.as_message_command_group("tag")
 async def tag_group(
     ctx: tanjun.abc.MessageContext,
     name: str,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
-    """Gets a tags content from the database."""
     query = (
         "UPDATE tags SET Uses = Uses + 1 WHERE GuildID = $1 AND TagName = $2 RETURNING TagContent;"
     )
@@ -72,6 +77,11 @@ async def tag_group(
 @tag_group.with_command
 @tanjun.with_argument("name")
 @tanjun.with_parser
+@utils.with_help(
+    "Gets info about a tag.",
+    args=("name (str): The name of the tag.",),
+    usage="tag info my_tag\ntag info snab smort",
+)
 @tanjun.as_message_command("info")
 async def tag_info_command(
     ctx: tanjun.abc.MessageContext,
@@ -98,12 +108,12 @@ async def tag_info_command(
 
 
 @tag_group.with_command
+@utils.with_help("List this guilds tags.", usage="tag list")
 @tanjun.as_message_command("list")
 async def tag_list_command(
     ctx: tanjun.abc.MessageContext,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
-    """List this guilds tags."""
     query = "SELECT TagName FROM tags WHERE GuildID = $1;"
     tags = await bot.db.fetch_column(query, ctx.guild_id)
 
@@ -129,6 +139,14 @@ async def tag_list_command(
 @tanjun.with_greedy_argument("content")
 @tanjun.with_argument("name")
 @tanjun.with_parser
+@utils.with_help(
+    "Create a new tag.",
+    args=(
+        "name (str): The name of the tag.",
+        "content (str): The tags content."
+    ),
+    usage="tag create lol lul\ntag create beanos say wut :beanos:",
+)
 @tanjun.as_message_command("create")
 async def tag_create_slash_command(
     ctx: tanjun.abc.MessageContext,
@@ -172,6 +190,14 @@ async def tag_create_slash_command(
 @tanjun.with_greedy_argument("content")
 @tanjun.with_argument("name")
 @tanjun.with_parser
+@utils.with_help(
+    "Edit an existing tag you own.",
+    args=(
+        "name (str): The name of the tag.",
+        "content (str): The updated content."
+    ),
+    usage="tag edit my_tag new content",
+)
 @tanjun.as_message_command("edit",)
 async def tag_edit_command(
     ctx: tanjun.abc.MessageContext,
@@ -179,7 +205,6 @@ async def tag_edit_command(
     content: str,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
-    """Edit an existing tag you own."""
     name = name.lower()
 
     if owner := await bot.db.fetch_one(
@@ -259,6 +284,14 @@ async def tag_edit_command(
 @tanjun.with_argument("member", converters=int)
 @tanjun.with_argument("name")
 @tanjun.with_parser
+@utils.with_help(
+    "Transfer a tag you own to another member.",
+    args=(
+        "name (str): The name of the tag.",
+        "member (int): The ID of the member to transer to."
+    ),
+    usage="tag transfer my_tag 1234567898769420",
+)
 @tanjun.as_message_command("transfer")
 async def tag_transfer_command(
     ctx: tanjun.abc.MessageContext,
@@ -266,7 +299,6 @@ async def tag_transfer_command(
     member: int,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
-    """Transfer a tag you own to another member."""
     name = name.lower()
 
     if owner := await bot.db.fetch_one(
@@ -298,13 +330,17 @@ async def tag_transfer_command(
 @tag_group.with_command
 @tanjun.with_argument("name")
 @tanjun.with_parser
+@utils.with_help(
+    "Delete a tag you own.",
+    args=("name (str): The name of the tag.",),
+    usage="tag delete my_tag",
+)
 @tanjun.as_message_command("delete")
-async def tag_delete_slash_command(
+async def tag_delete_command(
     ctx: tanjun.abc.MessageContext,
     name: str,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
-    """Delete a tag you own."""
     name = name.lower()
 
     if owner := await bot.db.fetch_one(
