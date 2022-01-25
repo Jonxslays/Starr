@@ -58,7 +58,7 @@ class Database:
             host=self.host,
             port=self.port,
             database=self.db,
-            password=self.password[0],
+            password=self.password,
             loop=asyncio.get_running_loop(),
         )
 

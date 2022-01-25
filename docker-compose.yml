@@ -10,8 +10,8 @@ services:
       POSTGRES_DB: $PG_DB
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - $PG_PORT:$PG_PORT
+    expose:
+      - $PG_PORT
     networks:
       - private
 
