@@ -44,8 +44,9 @@ if __name__ == "__main__":
     utils.configure_logging()
 
     bot.run(
+        status=hikari.Status.IDLE,
         activity=hikari.Activity(
-            name=f"from the stars - v{__version__}",
+            name=f"from the stars...",
             type=hikari.ActivityType.WATCHING,
         )
     )
