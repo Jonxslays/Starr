@@ -94,8 +94,7 @@ class StarrBot(hikari.GatewayBot):
                 obj = StarrGuild(*guild)
                 self.guilds[obj.guild_id] = obj
 
-        assert (me := self.get_me()) is not None
-        self.my_id = me.id
+        self.my_id = me.id if (me := self.get_me()) else (await self.rest.fetch_my_user()).id
 
     async def on_stopped(self, _: hikari.StoppingEvent) -> None:
         await self.db.close()
@@ -109,6 +108,6 @@ class StarrBot(hikari.GatewayBot):
 
     async def resolve_prefix(self, ctx: tanjun.context.MessageContext) -> tuple[str, ...]:
         if ctx.guild_id and (guild := self.guilds.get(ctx.guild_id)):
-            return tuple(guild.prefix)
+            return (guild.prefix,)
 
         return ("./",)
