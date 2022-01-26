@@ -55,7 +55,7 @@ async def ping_message_cmd(
     elapsed = time.perf_counter() - start
 
     await message.edit(
-        f"Gateway: {bot.heartbeat_latency * 1000:,.2f} ms\nRest: {elapsed * 1000:,.2f} ms"
+        f"**Gateway**: {bot.heartbeat_latency * 1000:,.0f} ms\n**REST**: {elapsed * 1000:,.0f} ms"
     )
 
 
