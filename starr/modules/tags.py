@@ -34,7 +34,7 @@ from __future__ import annotations
 import hikari
 import tanjun
 
-from starr import utils
+from starr import models, utils
 from starr.bot import StarrBot
 
 RESERVED_TAGS = (
@@ -75,7 +75,7 @@ async def tag_group(
 
 
 @tag_group.with_command
-@tanjun.with_argument("name")
+@tanjun.with_greedy_argument("name")
 @tanjun.with_parser
 @utils.with_help(
     "Gets info about a tag.",
@@ -85,7 +85,7 @@ async def tag_group(
 @tanjun.as_message_command("info")
 async def tag_info_command(
     ctx: tanjun.abc.MessageContext,
-    name:str,
+    name: str,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
     """Gets info about a tag."""
@@ -114,25 +114,31 @@ async def tag_list_command(
     ctx: tanjun.abc.MessageContext,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
-    query = "SELECT TagName FROM tags WHERE GuildID = $1;"
-    tags = await bot.db.fetch_column(query, ctx.guild_id)
+    query = "SELECT TagName, TagOwner, Uses FROM tags WHERE GuildID = $1;"
+    tags = await bot.db.fetch_rows(query, ctx.guild_id)
 
     # If there are no tags stored
     if not len(tags):
         await ctx.respond("No tags for this guild yet, make one!")
         return None
 
-    description: str = ", ".join(f"{t}" for t in tags)
+    # description: str = ", ".join(f"{t}" for t in tags)
     guild = ctx.get_guild()
     guild_name = guild.name if guild else "this guild"
+    fields: list[tuple[str, ...]] = []
 
-    await ctx.respond(
-        hikari.Embed(
-            title=f"Tags for {guild_name}",
-            description=f"```{description}```",
-            color=hikari.Color(0x19fa3b),
-        )
+    for tag in tags:
+        fields.append((tag[0], f"**Tag Owner**: <@!{tag[1]}> - **Tag Uses**: {tag[2]}"))
+
+    pag = models.Paginator(
+        ctx,
+        bot,
+        title=f"Tags for {guild_name}",
+        description="",
+        per_page=3,
+        fields=fields,
     )
+    await pag.paginate(60)
 
 
 @tag_group.with_command

@@ -31,9 +31,164 @@
 
 from __future__ import annotations
 
+import datetime
+import secrets
+
 import hikari
+import tanjun
 
 from starr.db import Database
+
+
+class Paginator:
+
+    __slots__ = (
+        "ctx",
+        "bot",
+        "title",
+        "description",
+        "fields",
+        "per_page",
+        "page",
+        "embed",
+        "converted",
+        "id_hash",
+        "message",
+        "components",
+    )
+
+    def __init__(
+        self,
+        ctx: tanjun.abc.Context,
+        bot: hikari.GatewayBot,
+        *,
+        title: str,
+        description: str,
+        fields: list[tuple[str, ...]],
+        per_page: int = 5,
+    ) -> None:
+        self.ctx = ctx
+        self.bot = bot
+        self.title = title
+        self.description = description
+        self.fields = fields
+        self.per_page = per_page
+        self.page = 0
+        self.converted: list[hikari.Embed] = []
+        self.id_hash = secrets.token_urlsafe(8)
+        self.message: hikari.Message | None = None
+        self.components = self.generate_buttons()
+        self.embed = hikari.Embed(
+            title=title,
+            description=description,
+            color=hikari.Color(0x19fa3b),
+            timestamp=datetime.datetime.now(datetime.timezone.utc),
+        )
+
+    def get_new_embed(self) -> hikari.Embed:
+        return hikari.Embed(
+            title=self.title,
+            description=self.description,
+            color=hikari.Color(0x19fa3b),
+            timestamp=datetime.datetime.now(datetime.timezone.utc),
+        ).set_thumbnail(self.ctx.author.avatar_url or self.ctx.author.default_avatar_url)
+
+    async def paginate(self, timeout: int | float) -> None:
+        e = self.get_new_embed()
+        current = 0
+
+        for field in self.fields:
+            e.add_field(*field)
+
+            if current >= self.per_page - 1:
+                self.converted.append(e)
+                e = self.get_new_embed()
+                current = 0
+                continue
+
+            current += 1
+
+        self.message = await self.ctx.respond(
+            self.converted[self.page], components=self.components, ensure_result=True
+        )
+        await self.listen(timeout)
+
+    def generate_buttons(self) -> list[hikari.api.ActionRowBuilder]:
+        buttons = {
+            "first": "\u23EE\uFE0F",
+            "prev": "\u23EA",
+            "stop": "\u23F9\uFE0F",
+            "next": "\u23E9",
+            "last": "\u23ED\uFE0F",
+        }
+
+        row = self.ctx.rest.build_action_row()
+
+        for key, button in buttons.items():
+            style = hikari.ButtonStyle.PRIMARY if key != "stop" else hikari.ButtonStyle.DANGER
+            (
+                row.add_button(style, f"{self.id_hash}-{key}")  # type: ignore
+                .set_emoji(button)
+                .add_to_container()
+            )
+
+        return [row]
+
+    async def respond(
+        self,
+        interaction: hikari.ComponentInteraction | None,
+        components: list[hikari.api.ActionRowBuilder],
+    ) -> None:
+        if not interaction:
+            assert self.message is not None
+            await self.message.edit(self.converted[self.page], components=components)
+            return None
+
+        try:
+            await interaction.create_initial_response(
+                hikari.ResponseType.MESSAGE_UPDATE,
+                self.converted[self.page],
+                components=components,
+            )
+
+        except hikari.NotFoundError:
+            await interaction.edit_initial_response(
+                self.converted[self.page], components=components
+            )
+
+
+    async def listen(self, timeout: int | float) -> None:
+        with self.bot.stream(hikari.InteractionCreateEvent, timeout=timeout).filter(
+            lambda e: (
+                isinstance(e.interaction, hikari.ComponentInteraction)
+                and e.interaction.user == self.ctx.author
+                and e.interaction.message == self.message
+            )
+        ) as stream:
+            async for event in stream:
+                assert isinstance(event.interaction, hikari.ComponentInteraction)
+                cid = event.interaction.custom_id
+
+                if cid == f"{self.id_hash}-stop":
+                    break
+
+                elif cid == f"{self.id_hash}-next":
+                    if self.page < len(self.converted) - 1:
+                        self.page += 1
+
+                elif cid == f"{self.id_hash}-prev":
+                    if self.page > 0:
+                        self.page -= 1
+
+                elif cid == f"{self.id_hash}-first":
+                    self.page = 0
+
+                elif cid == f"{self.id_hash}-last":
+                    self.page = len(self.converted) - 1
+
+                await self.respond(event.interaction, self.components)
+
+        await self.respond(None, [])
 
 
 class StarrGuild:
