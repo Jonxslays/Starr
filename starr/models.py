@@ -32,6 +32,7 @@
 from __future__ import annotations
 
 import datetime
+import math
 import secrets
 
 import hikari
@@ -55,6 +56,7 @@ class Paginator:
         "id_hash",
         "message",
         "components",
+        "num_pages",
     )
 
     def __init__(
@@ -75,6 +77,7 @@ class Paginator:
         self.per_page = per_page
         self.page = 0
         self.converted: list[hikari.Embed] = []
+        self.num_pages = math.ceil(len(self.fields) / self.per_page)
         self.id_hash = secrets.token_urlsafe(8)
         self.message: hikari.Message | None = None
         self.components = self.generate_buttons()
@@ -100,7 +103,7 @@ class Paginator:
         for field in self.fields:
             e.add_field(*field)
 
-            if current >= self.per_page - 1:
+            if current == self.per_page - 1:
                 self.converted.append(e)
                 e = self.get_new_embed()
                 current = 0
@@ -108,6 +111,7 @@ class Paginator:
 
             current += 1
 
+        self.converted.append(e)
         self.message = await self.ctx.respond(
             self.converted[self.page], components=self.components, ensure_result=True
         )
@@ -139,8 +143,9 @@ class Paginator:
         interaction: hikari.ComponentInteraction | None,
         components: list[hikari.api.ActionRowBuilder],
     ) -> None:
+        assert self.message is not None
+
         if not interaction:
-            assert self.message is not None
             await self.message.edit(self.converted[self.page], components=components)
             return None
 
@@ -152,10 +157,7 @@ class Paginator:
             )
 
         except hikari.NotFoundError:
-            await interaction.edit_initial_response(
-                self.converted[self.page], components=components
-            )
-
+            await self.message.edit(self.converted[self.page], components=components)
 
     async def listen(self, timeout: int | float) -> None:
         with self.bot.stream(hikari.InteractionCreateEvent, timeout=timeout).filter(
@@ -173,18 +175,18 @@ class Paginator:
                     break
 
                 elif cid == f"{self.id_hash}-next":
-                    if self.page < len(self.converted) - 1:
+                    if self.page < self.num_pages - 1:
                         self.page += 1
 
                 elif cid == f"{self.id_hash}-prev":
-                    if self.page > 0:
+                    if self.page != 0:
                         self.page -= 1
 
                 elif cid == f"{self.id_hash}-first":
                     self.page = 0
 
                 elif cid == f"{self.id_hash}-last":
-                    self.page = len(self.converted) - 1
+                    self.page = self.num_pages - 1
 
                 await self.respond(event.interaction, self.components)
 

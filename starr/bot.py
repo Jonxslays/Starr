@@ -72,6 +72,7 @@ class StarrBot(hikari.GatewayBot):
             .add_check(tanjun.checks.GuildCheck())
             .set_prefix_getter(self.resolve_prefix)
             .load_modules(*Path("./starr/modules").glob("[!_]*.py"))
+            .set_auto_defer_after(2)
         )
 
         self.subscribe(hikari.StartingEvent, self.on_starting)

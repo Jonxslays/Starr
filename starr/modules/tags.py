@@ -128,7 +128,7 @@ async def tag_list_command(
     fields: list[tuple[str, ...]] = []
 
     for tag in tags:
-        fields.append((tag[0], f"**Tag Owner**: <@!{tag[1]}> - **Tag Uses**: {tag[2]}"))
+        fields.append((tag[0], f"**Tag Owner**: <@!{tag[1]}>\n**Tag Uses**: {tag[2]}"))
 
     pag = models.Paginator(
         ctx,
