@@ -135,7 +135,7 @@ async def tag_list_command(
         bot,
         title=f"Tags for {guild_name}",
         description="",
-        per_page=3,
+        per_page=5,
         fields=fields,
     )
     await pag.paginate(60)
