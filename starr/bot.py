@@ -108,9 +108,7 @@ class StarrBot(hikari.GatewayBot):
             self.guilds[guild.guild_id] = guild
 
     async def resolve_prefix(self, ctx: tanjun.context.MessageContext) -> tuple[str]:
-        assert ctx.guild_id is not None
-
-        if guild := self.guilds.get(ctx.guild_id):
-            return (guild.prefix,)
+        if ctx.guild_id and (guild := self.guilds.get(ctx.guild_id)):
+            return tuple(guild.prefix)
 
         return ("./",)
