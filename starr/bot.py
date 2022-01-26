@@ -40,7 +40,6 @@ import tanjun
 
 from starr.db import Database
 from starr.models import StarrGuild
-from starr.utils import ErrorHooks
 
 SubscriptionsT = dict[t.Type[hikari.Event], t.Callable[...,  t.Coroutine[t.Any, t.Any, None]]]
 
@@ -68,7 +67,7 @@ class StarrBot(hikari.GatewayBot):
                 mention_prefix=True,
                 declare_global_commands=tuple(map(int, default_guilds)),
             )
-            .set_hooks(ErrorHooks)
+            # .set_hooks(ErrorHooks) # FIXME: stops error parsing?
             .add_check(tanjun.checks.GuildCheck())
             .set_prefix_getter(self.resolve_prefix)
             .load_modules(*Path("./starr/modules").glob("[!_]*.py"))
