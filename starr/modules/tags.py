@@ -334,7 +334,7 @@ async def tag_transfer_command(
 
 
 @tag_group.with_command
-@tanjun.with_argument("name")
+@tanjun.with_greedy_argument("name")
 @tanjun.with_parser
 @utils.with_help(
     "Delete a tag you own.",
