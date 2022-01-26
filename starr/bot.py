@@ -55,6 +55,10 @@ class StarrBot(hikari.GatewayBot):
             intents=hikari.Intents.ALL,
         )
 
+        default_guilds = (
+            (environ["DEV"], environ["PROD"]) if int(environ["IS_PROD"]) else (environ["DEV"],)
+        )
+
         self.star = "\u2B50"
         self.db = Database()
         self.guilds: dict[int, StarrGuild] = {}
@@ -62,7 +66,7 @@ class StarrBot(hikari.GatewayBot):
             tanjun.Client.from_gateway_bot(
                 self,
                 mention_prefix=True,
-                declare_global_commands=int(environ.get("DEV", environ["PROD"])),
+                declare_global_commands=tuple(map(int, default_guilds)),
             )
             .set_hooks(ErrorHooks)
             .add_check(tanjun.checks.GuildCheck())
