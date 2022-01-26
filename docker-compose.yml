@@ -22,6 +22,8 @@ services:
     depends_on:
       - starr-db
     command: poetry run python -m starr
+    volumes:
+      - ./starr/data/logs:/app/starr/data/logs
     networks:
       - private
 
@@ -31,3 +33,4 @@ networks:
 
 volumes:
   postgres_data:
+  logs_data:

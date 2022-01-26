@@ -107,7 +107,7 @@ class StarrBot(hikari.GatewayBot):
             guild = await StarrGuild.default_with_insert(self.db, event.guild_id)
             self.guilds[guild.guild_id] = guild
 
-    async def resolve_prefix(self, ctx: tanjun.context.MessageContext) -> tuple[str]:
+    async def resolve_prefix(self, ctx: tanjun.context.MessageContext) -> tuple[str, ...]:
         if ctx.guild_id and (guild := self.guilds.get(ctx.guild_id)):
             return tuple(guild.prefix)
 
