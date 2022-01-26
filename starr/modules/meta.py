@@ -97,8 +97,7 @@ async def _user_info(
             "Roles",
             ", ".join(
                 r.mention for r in (member.get_roles() or await member.fetch_roles())
-                if "everyone" not in r.name
-            )
+            ) or "No roles?"
         )
     )
 
