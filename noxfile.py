@@ -101,7 +101,5 @@ def licensing(session: nox.Session) -> None:
                 missing.append(path)
 
     if missing:
-        session.error(
-            "\nThe following files are missing their license:\n"
-            + "\n".join(f" - {m}" for m in missing)
-        )
+        formatted = "\n".join(f" - {m}" for m in missing)
+        session.error(f"\nThe following files are missing their license:\n\n{formatted}")
