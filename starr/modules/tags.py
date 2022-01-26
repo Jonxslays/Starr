@@ -114,7 +114,7 @@ async def tag_list_command(
     ctx: tanjun.abc.MessageContext,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
-    query = "SELECT TagName, TagOwner, Uses FROM tags WHERE GuildID = $1;"
+    query = "SELECT TagName, TagOwner, Uses FROM tags WHERE GuildID = $1 ORDER BY Uses DESC;"
     tags = await bot.db.fetch_rows(query, ctx.guild_id)
 
     # If there are no tags stored
