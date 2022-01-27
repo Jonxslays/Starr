@@ -85,6 +85,9 @@ async def on_reaction_add(
 
     message, guild, count = event_data
 
+    if message.channel_id == guild.star_channel:
+        return None
+
     if count >= guild.threshold:
         # This message is a star!
         starboard_message = await StarboardMessage.from_reference(bot.db, message.id, guild)
