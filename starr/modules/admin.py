@@ -31,9 +31,12 @@
 
 from __future__ import annotations
 
+import datetime
+
 import hikari
 import tanjun
 
+from starr import models
 from starr.bot import StarrBot
 
 admin = (
@@ -118,6 +121,28 @@ async def configure_prefix_cmd(
     guild.prefix = value
 
     await ctx.respond(f"Successfully updated message command prefix to `{value}`.")
+
+
+@config.with_command
+@tanjun.as_slash_command("list", "List the configurations for this guild.")
+async def configure_list_cmd(
+    ctx: tanjun.abc.SlashContext,
+    bot: StarrBot = tanjun.inject(type=StarrBot),
+) -> None:
+    assert ctx.guild_id is not None
+    guild = await models.StarrGuild.from_db(bot.db, ctx.guild_id)
+    name = g.name if (g := ctx.get_guild()) else "this guild"
+
+    await ctx.respond(
+        hikari.Embed(
+            description=f"Configurations for {name}",
+            color=hikari.Color(0x13f07a),
+            timestamp=datetime.datetime.now(datetime.timezone.utc)
+        )
+        .add_field("Starboard threshold:", f"`{guild.threshold}`", inline=True)
+        .add_field("Starboard channel:", f"<#{guild.star_channel}>", inline=True)
+        .add_field("Command Prefix:", f"`{guild.prefix}`", inline=False)
+    )
 
 ########################################################################
 # END CONFIG
