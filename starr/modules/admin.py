@@ -31,8 +31,6 @@
 
 from __future__ import annotations
 
-import typing as t
-
 import hikari
 import tanjun
 
@@ -73,35 +71,29 @@ async def configure_starboard_cmd(
 ) -> None:
     assert ctx.guild_id is not None
 
-    updates: list[tuple[t.Any, ...]] = []
     responses: list[str] = []
+    guild = bot.guilds[ctx.guild_id]
 
     if channel:
-        guild = bot.guilds[ctx.guild_id]
         guild.stars_configured = 1
         guild.star_channel = channel.id
 
-        updates.append(
-            (
-                "UPDATE guilds SET StarChannel = $1, StarsConfigured = 1 WHERE GuildID = $2;",
-                channel.id,
-                ctx.guild_id,
-            )
+        await bot.db.execute(
+            "UPDATE guilds SET StarChannel = $1, StarsConfigured = 1 WHERE GuildID = $2;",
+            channel.id,
+            ctx.guild_id,
         )
         responses.append(f"Successfully updated starboard channel to <#{channel.id}>.")
 
     if threshold:
-        updates.append(
-            (
-                "UPDATE guilds SET Threshold = $1 WHERE GuildID = $2;",
-                threshold,
-                ctx.guild_id,
-            )
+        guild.threshold = threshold
+
+        await bot.db.execute(
+            "UPDATE guilds SET Threshold = $1 WHERE GuildID = $2;",
+            threshold,
+            ctx.guild_id,
         )
         responses.append(f"Successfully updated starboard star threshold to {threshold}.")
-
-    for update in updates:
-        await bot.db.execute(*update)
 
     if responses:
         await ctx.respond("\n".join(responses))

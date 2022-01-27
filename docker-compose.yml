@@ -33,4 +33,3 @@ networks:
 
 volumes:
   postgres_data:
-  logs_data:

@@ -243,6 +243,10 @@ class StarrGuild:
     def threshold(self) -> int:
         return self._threshold
 
+    @threshold.setter
+    def threshold(self, value: int) -> None:
+        self._threshold = value
+
     @classmethod
     async def from_db(cls, db: Database, guild_id: int) -> StarrGuild:
         data = await db.fetch_row("SELECT * FROM guilds WHERE GuildID = $1;", guild_id)
