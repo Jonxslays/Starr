@@ -46,7 +46,7 @@ if __name__ == "__main__":
     bot.run(
         status=hikari.Status.IDLE,
         activity=hikari.Activity(
-            name=f"from the stars...",
+            name="from the stars...",
             type=hikari.ActivityType.WATCHING,
         )
     )
