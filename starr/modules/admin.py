@@ -36,8 +36,8 @@ import datetime
 import hikari
 import tanjun
 
-from starr import models
 from starr.bot import StarrBot
+from starr.models import StarrGuild
 
 admin = tanjun.Component(name="admin").add_check(
     tanjun.checks.AuthorPermissionCheck(
@@ -126,7 +126,7 @@ async def configure_list_cmd(
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
     assert ctx.guild_id is not None
-    guild = await models.StarrGuild.from_db(bot.db, ctx.guild_id)
+    guild = await StarrGuild.from_db(bot.db, ctx.guild_id)
     name = g.name if (g := ctx.get_guild()) else "this guild"
 
     await ctx.respond(
