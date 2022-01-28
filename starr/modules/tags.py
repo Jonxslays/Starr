@@ -34,7 +34,8 @@ from __future__ import annotations
 import hikari
 import tanjun
 
-from starr import models, utils
+from starr import models
+from starr import utils
 from starr.bot import StarrBot
 
 RESERVED_TAGS = (
@@ -99,8 +100,8 @@ async def tag_info_command(
     await ctx.respond(
         hikari.Embed(
             title=f"Tag information",
-            description=f"Requested tag: `{name}`" "",
-            color=hikari.Color(0x19fa3b),
+            description=f"Requested tag: `{name}`",
+            color=hikari.Color(0x19FA3B),
         )
         .add_field("Owner", f"<@!{tag_name_info[0]}>", inline=True)
         .add_field("Uses", tag_name_info[1], inline=True)
@@ -147,10 +148,7 @@ async def tag_list_command(
 @tanjun.with_parser
 @utils.with_help(
     "Create a new tag.",
-    args=(
-        "name (str): The name of the tag.",
-        "content (str): The tags content."
-    ),
+    args=("name (str): The name of the tag.", "content (str): The tags content."),
     usage="tag create lol lul\ntag create beanos say wut :beanos:",
 )
 @tanjun.as_message_command("create")
@@ -198,13 +196,10 @@ async def tag_create_slash_command(
 @tanjun.with_parser
 @utils.with_help(
     "Edit an existing tag you own.",
-    args=(
-        "name (str): The name of the tag.",
-        "content (str): The updated content."
-    ),
+    args=("name (str): The name of the tag.", "content (str): The updated content."),
     usage="tag edit my_tag new content",
 )
-@tanjun.as_message_command("edit",)
+@tanjun.as_message_command("edit")
 async def tag_edit_command(
     ctx: tanjun.abc.MessageContext,
     name: str,
@@ -266,8 +261,7 @@ async def tag_edit_command(
 
             if event.interaction.custom_id == "yes":
                 await bot.db.execute(
-                    "INSERT INTO tags (GuildID, TagOwner, TagName, TagContent) "
-                    "VALUES ($1, $2, $3, $4);",
+                    "INSERT INTO tags (GuildID, TagOwner, TagName, TagContent) VALUES ($1, $2, $3, $4);",
                     ctx.guild_id,
                     ctx.author.id,
                     name,
@@ -292,10 +286,7 @@ async def tag_edit_command(
 @tanjun.with_parser
 @utils.with_help(
     "Transfer a tag you own to another member.",
-    args=(
-        "name (str): The name of the tag.",
-        "member (int): The ID of the member to transer to."
-    ),
+    args=("name (str): The name of the tag.", "member (int): The ID of the member to transer to."),
     usage="tag transfer my_tag 1234567898769420",
 )
 @tanjun.as_message_command("transfer")

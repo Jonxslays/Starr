@@ -57,7 +57,7 @@ async def on_error(ctx: tanjun.abc.Context, error: Exception) -> bool:
         hikari.Embed(
             title="Exception event",
             description=description,
-            color=hikari.Color(0xf00a0a),
+            color=hikari.Color(0xF00A0A),
             timestamp=datetime.datetime.now(datetime.timezone.utc),
         )
     )
@@ -67,10 +67,10 @@ async def on_error(ctx: tanjun.abc.Context, error: Exception) -> bool:
 
 CommandT = t.TypeVar("CommandT", bound=tanjun.abc.ExecutableCommand[t.Any])
 
+
 def with_help(
     help_text: str, *, args: tuple[str, ...] = (), usage: str = ""
 ) -> t.Callable[[CommandT], CommandT]:
-
     def inner(command: CommandT) -> CommandT:
         command.metadata["help"] = help_text
         command.metadata["args"] = "\n\n".join(args)
@@ -86,7 +86,7 @@ def configure_logging() -> None:
 
     rfh = RotatingFileHandler(
         "./starr/data/logs/main.log",
-        maxBytes=521288, # 512KB
+        maxBytes=521288,  # 512KB
         encoding="utf-8",
         backupCount=10,
     )

@@ -41,7 +41,7 @@ import tanjun
 from starr.db import Database
 from starr.models import StarrGuild
 
-SubscriptionsT = dict[t.Type[hikari.Event], t.Callable[...,  t.Coroutine[t.Any, t.Any, None]]]
+SubscriptionsT = dict[t.Type[hikari.Event], t.Callable[..., t.Coroutine[t.Any, t.Any, None]]]
 
 
 class StarrBot(hikari.GatewayBot):
@@ -51,7 +51,9 @@ class StarrBot(hikari.GatewayBot):
     def __init__(self) -> None:
         super().__init__(
             token=environ["TOKEN"],
-            intents=hikari.Intents.ALL,
+            intents=hikari.Intents.GUILDS
+            | hikari.Intents.GUILD_MESSAGE_REACTIONS
+            | hikari.Intents.GUILD_MESSAGES,
         )
 
         default_guilds = (
@@ -81,9 +83,9 @@ class StarrBot(hikari.GatewayBot):
         self.subscribe(hikari.GuildJoinEvent, self.on_guild_available)
 
     async def getch_member(self, guild_id: int, member_id: int) -> hikari.Member:
-        return self.cache.get_member(
+        return self.cache.get_member(guild_id, member_id) or await self.rest.fetch_member(
             guild_id, member_id
-        ) or await self.rest.fetch_member(guild_id, member_id)
+        )
 
     async def on_starting(self, _: hikari.StartingEvent) -> None:
         await self.db.connect()

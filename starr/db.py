@@ -43,7 +43,6 @@ class Database:
     """Wrapper class for AsyncPG Database access."""
 
     def __init__(self) -> None:
-        self.calls = 0
         self.db = environ["PG_DB"]
         self.host = environ["PG_HOST"]
         self.user = environ["PG_USER"]
@@ -75,7 +74,6 @@ class Database:
         @functools.wraps(func)
         async def wrapper(self: Database, *args: t.Any) -> t.Any:
             async with self.pool.acquire() as conn:
-                self.calls += 1
                 return await func(self, *args, conn=conn)
 
         return wrapper

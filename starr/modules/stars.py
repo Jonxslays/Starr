@@ -35,15 +35,14 @@ import hikari
 import tanjun
 
 from starr.bot import StarrBot
-from starr.models import StarboardMessage, StarrGuild
+from starr.models import StarboardMessage
+from starr.models import StarrGuild
 
 stars = tanjun.Component(name="stars")
 
 
 async def get_reaction_event_info(
-    event: hikari.GuildReactionAddEvent
-    | hikari.GuildReactionDeleteEmojiEvent
-    | hikari.GuildReactionDeleteEvent,
+    event: hikari.GuildReactionAddEvent | hikari.GuildReactionDeleteEvent,
     bot: StarrBot,
 ) -> tuple[hikari.Message, StarrGuild, int] | None:
     if event.emoji_name != bot.star:
@@ -55,7 +54,7 @@ async def get_reaction_event_info(
         # if not cached.
         guild = await StarrGuild.from_db(bot.db, event.guild_id)
 
-    if not guild.stars_configured:
+    if not guild.star_channel:
         # The guild hasn't configured their starboard yet.
         return None
 
@@ -76,12 +75,16 @@ async def get_reaction_event_info(
     return message, guild, count
 
 
-async def handle_star_add_event(
-    bot: StarrBot,
-    message: hikari.Message,
-    guild: StarrGuild,
-    count: int,
+@stars.with_listener(hikari.GuildReactionAddEvent)
+async def on_reaction_add(
+    event: hikari.GuildReactionAddEvent, bot: StarrBot = tanjun.inject(type=StarrBot)
 ) -> None:
+    if not (event_data := await get_reaction_event_info(event, bot)):
+        # If this returns None we don't care about the event.
+        return None
+
+    message, guild, count = event_data
+
     if count >= guild.threshold:
         # This message is a star!
         starboard_message = await StarboardMessage.from_reference(bot.db, message.id, guild)
@@ -95,12 +98,16 @@ async def handle_star_add_event(
             await starboard_message.update(bot.rest, bot.db, message, count, guild)
 
 
-async def handle_star_delete_event(
-    bot: StarrBot,
-    message: hikari.Message,
-    guild: StarrGuild,
-    count: int,
+@stars.with_listener(hikari.GuildReactionDeleteEvent)
+async def on_reaction_delete(
+    event: hikari.GuildReactionDeleteEvent,
+    bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
+    if not (event_data := await get_reaction_event_info(event, bot)):
+        # If this returns None we don't care about the event.
+        return None
+
+    message, guild, count = event_data
     starboard_message = await StarboardMessage.from_reference(bot.db, message.id, guild)
 
     if not starboard_message:
@@ -116,27 +123,21 @@ async def handle_star_delete_event(
         await starboard_message.update(bot.rest, bot.db, message, count, guild)
 
 
-async def handle_maybe_delete(
-    event: hikari.GuildReactionDeleteEvent | hikari.GuildReactionDeleteEmojiEvent,
-    bot: StarrBot = tanjun.inject(type=StarrBot),
-) -> None:
-    if not (event_data := await get_reaction_event_info(event, bot)):
-        # If this returns None we don't care about the event.
-        return None
-
-    message, guild, count = event_data
-    await handle_star_delete_event(bot, message, guild, count)
-
-
+@stars.with_listener(hikari.GuildMessageDeleteEvent)
+@stars.with_listener(hikari.GuildReactionDeleteEmojiEvent)
+@stars.with_listener(hikari.GuildReactionDeleteAllEvent)
 async def handle_guaranteed_delete(
-    event: hikari.GuildMessageDeleteEvent | hikari.GuildReactionDeleteAllEvent, bot: StarrBot
+    event: hikari.GuildMessageDeleteEvent
+    | hikari.GuildReactionDeleteEmojiEvent
+    | hikari.GuildReactionDeleteAllEvent,
+    bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
     if not (guild := bot.guilds.get(event.guild_id)):
         # Grab the guild from cache, or construct it from the db
         # if not cached.
         guild = await StarrGuild.from_db(bot.db, event.guild_id)
 
-    if not guild.stars_configured:
+    if not guild.star_channel:
         # The guild hasn't configured their starboard yet.
         return None
 
@@ -144,46 +145,6 @@ async def handle_guaranteed_delete(
 
     # Delete message from db and starboard, it has no more reactions.
     return await message.delete(bot.rest, bot.db) if message else None
-
-
-@stars.with_listener(hikari.GuildReactionAddEvent)
-async def on_reaction_add(
-    event: hikari.GuildReactionAddEvent, bot: StarrBot = tanjun.inject(type=StarrBot)
-) -> None:
-    if not (event_data := await get_reaction_event_info(event, bot)):
-        # If this returns None we don't care about the event.
-        return None
-
-    message, guild, count = event_data
-    await handle_star_add_event(bot, message, guild, count)
-
-
-@stars.with_listener(hikari.GuildReactionDeleteEvent)
-async def on_reaction_delete(
-    event: hikari.GuildReactionDeleteEvent, bot: StarrBot = tanjun.inject(type=StarrBot)
-) -> None:
-    await handle_maybe_delete(event, bot)
-
-
-@stars.with_listener(hikari.GuildReactionDeleteEmojiEvent)
-async def on_reaction_emoji_delete(
-    event: hikari.GuildReactionDeleteEmojiEvent, bot: StarrBot = tanjun.inject(type=StarrBot)
-) -> None:
-    await handle_maybe_delete(event, bot)
-
-
-@stars.with_listener(hikari.GuildReactionDeleteAllEvent)
-async def on_reaction_delete_all(
-    event: hikari.GuildReactionDeleteAllEvent, bot: StarrBot = tanjun.inject(type=StarrBot)
-) -> None:
-    await handle_guaranteed_delete(event, bot)
-
-
-@stars.with_listener(hikari.GuildMessageDeleteEvent)
-async def on_guild_message_delete(
-    event: hikari.GuildMessageDeleteEvent, bot: StarrBot = tanjun.inject(type=StarrBot)
-) -> None:
-    await handle_guaranteed_delete(event, bot)
 
 
 @tanjun.as_loader

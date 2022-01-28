@@ -84,7 +84,7 @@ class Paginator:
         self.embed = hikari.Embed(
             title=title,
             description=description,
-            color=hikari.Color(0x19fa3b),
+            color=hikari.Color(0x19FA3B),
             timestamp=datetime.datetime.now(datetime.timezone.utc),
         )
 
@@ -92,7 +92,7 @@ class Paginator:
         return hikari.Embed(
             title=self.title,
             description=self.description,
-            color=hikari.Color(0x19fa3b),
+            color=hikari.Color(0x19FA3B),
             timestamp=datetime.datetime.now(datetime.timezone.utc),
         ).set_thumbnail(self.ctx.author.avatar_url or self.ctx.author.default_avatar_url)
 
@@ -130,11 +130,7 @@ class Paginator:
 
         for key, button in buttons.items():
             style = hikari.ButtonStyle.PRIMARY if key != "stop" else hikari.ButtonStyle.DANGER
-            (
-                row.add_button(style, f"{self.id_hash}-{key}")  # type: ignore
-                .set_emoji(button)
-                .add_to_container()
-            )
+            (row.add_button(style, f"{self.id_hash}-{key}").set_emoji(button).add_to_container())  # type: ignore
 
         return [row]
 
@@ -195,20 +191,18 @@ class Paginator:
 
 class StarrGuild:
 
-    __slots__ = ("_guild_id", "_prefix", "_star_channel", "_stars_configured", "_threshold")
+    __slots__ = ("_guild_id", "_prefix", "_star_channel", "_threshold")
 
     def __init__(
         self,
         guild_id: int,
         prefix: str,
         star_channel: int = 0,
-        stars_configured: int = 0,
         threshold: int = 5,
     ) -> None:
         self._guild_id = guild_id
         self._prefix = prefix
         self._star_channel = star_channel
-        self._stars_configured = stars_configured
         self._threshold = threshold
 
     @property
@@ -230,14 +224,6 @@ class StarrGuild:
     @star_channel.setter
     def star_channel(self, value: int) -> None:
         self._star_channel = value
-
-    @property
-    def stars_configured(self) -> int:
-        return self._stars_configured
-
-    @stars_configured.setter
-    def stars_configured(self, value: int) -> None:
-        self._stars_configured = value
 
     @property
     def threshold(self) -> int:
@@ -288,16 +274,12 @@ class StarboardMessage:
 
     async def db_insert(self, db: Database) -> None:
         await db.execute(
-            "INSERT INTO starboard_messages (StarMessageID, ReferenceID) "
-            "VALUES ($1, $2) ON CONFLICT DO NOTHING;",
+            "INSERT INTO starboard_messages (StarMessageID, ReferenceID) VALUES ($1, $2) ON CONFLICT DO NOTHING;",
             self._message_id,
             self._reference_id,
         )
 
     async def db_update(self, db: Database) -> None:
-        await db.execute(
-            "DELETE FROM starboard_messages WHERE ReferenceID = $1", self.reference_id
-        )
         await db.execute(
             "UPDATE starboard_messages SET StarMessageID = $1 WHERE ReferenceID = $2;",
             self._message_id,
@@ -309,7 +291,6 @@ class StarboardMessage:
         rest: hikari.api.RESTClient,
         db: Database,
     ) -> None:
-
         try:
             await rest.delete_message(self._guild.star_channel, self._message_id)
 
@@ -325,20 +306,19 @@ class StarboardMessage:
         self,
         rest: hikari.api.RESTClient,
         db: Database,
-        message: hikari.Message,
+        original_message: hikari.Message,
         count: int,
         guild: StarrGuild,
     ) -> None:
         try:
-            message = await rest.fetch_message(guild.star_channel, self._message_id)
+            await rest.edit_message(
+                guild.star_channel, self._message_id, f"You're a \u2B50 x{count}!\n"
+            )
 
         except hikari.NotFoundError:
-            message = await self.create_new(rest, db, message, count, guild)
+            message = await self.create_new(rest, db, original_message, count, guild)
             self._message_id = message.id
             await self.db_update(db)
-
-        else:
-            await message.edit(content=f"You're a \u2B50 x{count}!\n")
 
     @classmethod
     async def from_reference(
@@ -348,8 +328,7 @@ class StarboardMessage:
         guild: StarrGuild,
     ) -> StarboardMessage | None:
         data = await db.fetch_one(
-            "SELECT StarMessageID FROM starboard_messages WHERE ReferenceID = $1",
-            reference_id,
+            "SELECT StarMessageID FROM starboard_messages WHERE ReferenceID = $1", reference_id
         )
 
         if data:
@@ -362,27 +341,28 @@ class StarboardMessage:
         cls,
         rest: hikari.api.RESTClient,
         db: Database,
-        message: hikari.Message,
+        origial_message: hikari.Message,
         count: int,
         guild: StarrGuild,
     ) -> hikari.Message:
         embed = (
             hikari.Embed(
                 title=f"Jump to message",
-                url=message.make_link(guild.guild_id),
+                url=origial_message.make_link(guild.guild_id),
                 color=hikari.Color.from_hex_code("#fcd303"),
-                description=message.content,
-                timestamp=message.timestamp,
+                description=origial_message.content,
+                timestamp=origial_message.timestamp,
             )
             .set_author(
-                name=f"{message.author.username}#{message.author.discriminator}",
-                icon=message.author.avatar_url or message.author.default_avatar_url,
+                name=f"{origial_message.author.username}#{origial_message.author.discriminator}",
+                icon=origial_message.author.avatar_url
+                or origial_message.author.default_avatar_url,
             )
-            .set_footer(text=f"ID: {message.id}")
+            .set_footer(text=f"ID: {origial_message.id}")
         )
 
-        if message.attachments:
-            embed.set_image(message.attachments[0])
+        if origial_message.attachments:
+            embed.set_image(origial_message.attachments[0])
 
         new_message = await rest.create_message(
             content=f"You're a \u2B50 x{count}!\n",
@@ -390,6 +370,6 @@ class StarboardMessage:
             embed=embed,
         )
 
-        starboard_message = cls(new_message.id, message.id, guild)
+        starboard_message = cls(new_message.id, origial_message.id, guild)
         await starboard_message.db_insert(db)
         return new_message

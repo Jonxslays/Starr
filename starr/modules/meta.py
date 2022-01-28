@@ -69,10 +69,17 @@ async def _user_info(
     if isinstance(member, int):
         member = await bot.getch_member(ctx.guild_id, member)
 
-    if role := member.get_top_role():
-        color = role.color
-    else:
-        color = hikari.Color(0x31a6e0)
+    color = None
+    if roles := member.get_roles():
+        roles = sorted(roles, key=lambda r: r.position, reverse=True)
+
+        for role in roles:
+            if role.color:
+                color = role.color
+                break
+
+    if not color:
+        color = hikari.Color(0x31A6E0)
 
     e = (
         hikari.Embed(
@@ -85,19 +92,16 @@ async def _user_info(
         .set_image(member.banner_url)
         .add_field(
             "Created on",
-            from_datetime(member.created_at) +
-            f" ({from_datetime(member.created_at, style='R')})",
+            from_datetime(member.created_at) + f" ({from_datetime(member.created_at, style='R')})",
         )
         .add_field(
             "Joined on",
-            from_datetime(member.joined_at) +
-            f" ({from_datetime(member.joined_at, style='R')})",
+            from_datetime(member.joined_at) + f" ({from_datetime(member.joined_at, style='R')})",
         )
         .add_field(
             "Roles",
-            ", ".join(
-                r.mention for r in (member.get_roles() or await member.fetch_roles())
-            ) or "No roles?"
+            ", ".join(r.mention for r in (member.get_roles() or await member.fetch_roles()))
+            or "No roles?",
         )
     )
 
