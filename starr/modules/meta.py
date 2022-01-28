@@ -105,12 +105,11 @@ async def _user_info(
         if presence.activities:
             activity = presence.activities[0]
             activity_type = hikari.ActivityType(activity.type).name.title()
-
-            e.add_field(
-                "Activity",
-                f"{'' if 'custom' in activity_type else activity_type + ' '}{activity.name}",
-                inline=True,
+            value = (
+                ("" if "custom" in activity_type.lower() else activity_type) + " " + activity.name
             )
+
+            e.add_field("Activity", value, inline=True)
 
         e.add_field("Status", str(presence.visible_status), inline=True)
 

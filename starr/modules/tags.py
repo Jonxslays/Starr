@@ -339,25 +339,41 @@ async def tag_delete_command(
     name: str,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
+    assert ctx.guild_id is not None
     name = name.lower()
 
-    if owner := await bot.db.fetch_one(
-        "SELECT TagOwner FROM tags WHERE GuildID = $1 AND TagName = $2;", ctx.guild_id, name
-    ):
-        # A successful deletion
-        if owner == ctx.author.id:
-            await bot.db.execute(
-                "DELETE FROM tags WHERE GuildID = $1 AND TagName = $2;", ctx.guild_id, name
+    admin_query = (  # Allows admins to delete tags by name.
+        "DELETE FROM tags WHERE GuildID = $1 AND TagName = $2 RETURNING TagOwner;",
+        ctx.guild_id,
+        name,
+    )
+
+    user_query = (  # Author must be the tag owner.
+        admin_query[0].replace("WHERE", "WHERE TagOwner = $3 AND"),
+        *admin_query[1:],
+        ctx.author.id,
+    )
+
+    # Fetch the member and permissions.
+    member = await bot.getch_member(ctx.guild_id, ctx.author.id)
+    permissions = await tanjun.utilities.fetch_permissions(ctx.client, member)
+
+    if hikari.Permissions.ADMINISTRATOR in permissions:
+        # Use the admin query for admins.
+        if owner := await bot.db.fetch_one(*admin_query):
+            await ctx.respond(
+                f"<@!{member.id}> deleted the `{name}` tag "
+                f"(owned by <@!{owner}>) using admin perms."
             )
-            await ctx.respond(f"`{name}` tag deleted by <@!{ctx.author.id}>.")
             return None
 
-        # Can't delete a tag they don't own
-        await ctx.respond(f"<@!{owner}> owns the `{name}` tag, you cannot delete it.")
+    # Use the user query for regular users.
+    if owner := await bot.db.fetch_one(*user_query):
+        await ctx.respond(f"`{name}` tag deleted by <@!{ctx.author.id}>.")
         return None
 
-    # Can't delete a tag that doesn't exist
-    await ctx.respond(f"No `{name}` tag exists to delete.")
+    # Author tried to delete a non-existent tag or tag they don't own.
+    await ctx.respond(f"Failed to delete `{name}`, it doesn't exist or you don't own it.")
 
 
 @tanjun.as_loader
