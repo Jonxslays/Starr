@@ -66,8 +66,7 @@ async def _default_help(ctx: tanjun.abc.MessageContext) -> None:
                 (
                     "|".join(command.names),
                     command.metadata["help"]
-                    + "\n"
-                    + f"Subcommands: {', '.join('|'.join(c.names) for c in command.commands)}",
+                    + f"\nSubcommands: {', '.join('|'.join(c.names) for c in command.commands)}",
                 )
             )
 

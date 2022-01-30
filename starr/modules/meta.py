@@ -67,7 +67,7 @@ async def _user_info(
     assert ctx.guild_id is not None
 
     if isinstance(member, int):
-        member = await bot.getch_member(ctx.guild_id, member)
+        member = await bot.rest.fetch_member(ctx.guild_id, member)
 
     color = None
     if roles := member.get_roles():
@@ -92,17 +92,13 @@ async def _user_info(
         .set_image(member.banner_url)
         .add_field(
             "Created on",
-            from_datetime(member.created_at) + f" ({from_datetime(member.created_at, style='R')})",
+            f"{from_datetime(member.created_at)} ({from_datetime(member.created_at, style='R')})",
         )
         .add_field(
             "Joined on",
-            from_datetime(member.joined_at) + f" ({from_datetime(member.joined_at, style='R')})",
+            f"{from_datetime(member.joined_at)} ({from_datetime(member.joined_at, style='R')})",
         )
-        .add_field(
-            "Roles",
-            ", ".join(r.mention for r in (member.get_roles() or await member.fetch_roles()))
-            or "No roles?",
-        )
+        .add_field("Roles", ", ".join(r.mention for r in roles) or "No roles?")
     )
 
     if presence := member.get_presence():

@@ -261,7 +261,8 @@ async def tag_edit_command(
 
             if event.interaction.custom_id == "yes":
                 await bot.db.execute(
-                    "INSERT INTO tags (GuildID, TagOwner, TagName, TagContent) VALUES ($1, $2, $3, $4);",
+                    "INSERT INTO tags (GuildID, TagOwner, TagName, TagContent) "
+                    "VALUES ($1, $2, $3, $4);",
                     ctx.guild_id,
                     ctx.author.id,
                     name,

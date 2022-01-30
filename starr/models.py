@@ -130,7 +130,10 @@ class Paginator:
 
         for key, button in buttons.items():
             style = hikari.ButtonStyle.PRIMARY if key != "stop" else hikari.ButtonStyle.DANGER
-            (row.add_button(style, f"{self.id_hash}-{key}").set_emoji(button).add_to_container())  # type: ignore
+            # The type ignore can be removed when dev 106 releases.
+            row.add_button(style, f"{self.id_hash}-{key}").set_emoji(  # type: ignore
+                button
+            ).add_to_container()
 
         return [row]
 
@@ -274,7 +277,8 @@ class StarboardMessage:
 
     async def db_insert(self, db: Database) -> None:
         await db.execute(
-            "INSERT INTO starboard_messages (StarMessageID, ReferenceID) VALUES ($1, $2) ON CONFLICT DO NOTHING;",
+            "INSERT INTO starboard_messages (StarMessageID, ReferenceID) "
+            "VALUES ($1, $2) ON CONFLICT DO NOTHING;",
             self._message_id,
             self._reference_id,
         )
