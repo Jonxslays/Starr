@@ -119,7 +119,7 @@ async def tag_list_command(
     tags = await bot.db.fetch_rows(query, ctx.guild_id)
 
     # If there are no tags stored
-    if not len(tags):
+    if tags is None:
         await ctx.respond("No tags for this guild yet, make one!")
         return None
 
