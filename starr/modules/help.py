@@ -65,8 +65,8 @@ async def _default_help(ctx: tanjun.abc.MessageContext) -> None:
             message_commands.append(
                 (
                     "|".join(command.names),
-                    command.metadata["help"] + "\n" +
-                    f"Subcommands: {', '.join('|'.join(c.names) for c in command.commands)}",
+                    command.metadata["help"]
+                    + f"\nSubcommands: {', '.join('|'.join(c.names) for c in command.commands)}",
                 )
             )
 
@@ -80,7 +80,7 @@ async def _default_help(ctx: tanjun.abc.MessageContext) -> None:
         hikari.Embed(
             title="Command help - for more info use help <command>",
             description=f"```{message}```",
-            color=hikari.Color(0x1347f0),
+            color=hikari.Color(0x1347F0),
             timestamp=datetime.datetime.now(datetime.timezone.utc),
         )
     )
@@ -121,13 +121,13 @@ async def _command_help(ctx: tanjun.abc.MessageContext, command: str) -> None:
                 await ctx.respond(f"No command with name `{command}`.")
                 return None
 
-    args = final_command.metadata['args']
-    usage = final_command.metadata['usage']
+    args = final_command.metadata["args"]
+    usage = final_command.metadata["usage"]
 
     await ctx.respond(
         hikari.Embed(
             title=f"Command help for {command}",
-            color=hikari.Color(0x1347f0),
+            color=hikari.Color(0x1347F0),
             timestamp=datetime.datetime.now(datetime.timezone.utc),
             description=final_command.metadata["help"],
         )

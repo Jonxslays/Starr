@@ -39,13 +39,10 @@ import tanjun
 from starr import models
 from starr.bot import StarrBot
 
-admin = (
-    tanjun.Component(name="admin")
-    .add_check(
-        tanjun.checks.AuthorPermissionCheck(
-            hikari.Permissions.ADMINISTRATOR,
-            error_message="You're not allowed to do that.",
-        )
+admin = tanjun.Component(name="admin").add_check(
+    tanjun.checks.AuthorPermissionCheck(
+        hikari.Permissions.ADMINISTRATOR,
+        error_message="You're not allowed to do that.",
     )
 )
 
@@ -78,11 +75,10 @@ async def configure_starboard_cmd(
     guild = bot.guilds[ctx.guild_id]
 
     if channel:
-        guild.stars_configured = 1
         guild.star_channel = channel.id
 
         await bot.db.execute(
-            "UPDATE guilds SET StarChannel = $1, StarsConfigured = 1 WHERE GuildID = $2;",
+            "UPDATE guilds SET StarChannel = $1 WHERE GuildID = $2;",
             channel.id,
             ctx.guild_id,
         )
@@ -136,17 +132,19 @@ async def configure_list_cmd(
     await ctx.respond(
         hikari.Embed(
             description=f"Configurations for {name}",
-            color=hikari.Color(0x13f07a),
-            timestamp=datetime.datetime.now(datetime.timezone.utc)
+            color=hikari.Color(0x13F07A),
+            timestamp=datetime.datetime.now(datetime.timezone.utc),
         )
         .add_field("Starboard threshold:", f"`{guild.threshold}`", inline=True)
         .add_field("Starboard channel:", f"<#{guild.star_channel}>", inline=True)
         .add_field("Command Prefix:", f"`{guild.prefix}`", inline=False)
     )
 
+
 ########################################################################
 # END CONFIG
 ########################################################################
+
 
 @admin.with_command
 @tanjun.with_str_slash_option("reason", "The optional reason to add to the audit log.", default="")
@@ -164,8 +162,7 @@ async def kick_slash_cmd(
         await bot.rest.kick_member(ctx.guild_id, member, reason=reason)
     except hikari.ForbiddenError:
         await ctx.respond(
-            f"Unable to kick <@!{member.id}>, "
-            "I am missing permissions or my top role is too low."
+            f"Unable to kick <@!{member.id}>, I am missing permissions or my top role is too low."
         )
     else:
         await ctx.respond(f"Successfully kicked <@!{member.id}>.")
@@ -183,20 +180,21 @@ async def _ban_member(
 
     try:
         await bot.rest.ban_member(
-            ctx.guild_id, member,
+            ctx.guild_id,
+            member,
             delete_message_days=delete_message_days,
-            reason=reason + f" - banned by {ctx.author.username}"
+            reason=reason + f" - banned by {ctx.author.username}",
         )
     except hikari.ForbiddenError:
         message = (
-            f"Unable to ban <@!{member}>, "
-            "I am missing permissions or my top role is too low."
+            f"Unable to ban <@!{member}>, I am missing permissions or my top role is too low."
         )
 
     else:
         message = f"Successfully banned <@!{member}>" + (
             f", and deleted their messages from the past {delete_message_days} days."
-            if delete_message_days else "."
+            if delete_message_days
+            else "."
         )
 
     return message
