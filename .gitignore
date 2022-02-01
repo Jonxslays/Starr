@@ -133,3 +133,4 @@ dmypy.json
 .scripts
 .tests
 logs
+poetry.lock
