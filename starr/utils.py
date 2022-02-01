@@ -39,7 +39,17 @@ from logging.handlers import RotatingFileHandler
 import hikari
 import tanjun
 
+CommandT = t.TypeVar("CommandT", bound=tanjun.abc.ExecutableCommand[t.Any])
 ErrorHooks = tanjun.AnyHooks()
+
+
+def prepare_slash(command: t.Any) -> t.Any:
+    """Decorator to allow both command types on one callback."""
+
+    def wrapper(*args: t.Any, **kwargs: t.Any) -> t.Any:
+        return command.callback(*args, **kwargs)
+
+    return wrapper
 
 
 @ErrorHooks.with_on_error
@@ -63,9 +73,6 @@ async def on_error(ctx: tanjun.abc.Context, error: Exception) -> bool:
     )
 
     return result
-
-
-CommandT = t.TypeVar("CommandT", bound=tanjun.abc.ExecutableCommand[t.Any])
 
 
 def with_help(
