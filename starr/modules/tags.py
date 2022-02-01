@@ -152,7 +152,7 @@ async def tag_list_command(
     usage="tag create lol lul\ntag create beanos say wut :beanos:",
 )
 @tanjun.as_message_command("create")
-async def tag_create_slash_command(
+async def tag_create_command(
     ctx: tanjun.abc.MessageContext,
     name: str,
     content: str,
