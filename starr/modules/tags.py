@@ -342,38 +342,36 @@ async def tag_delete_command(
     assert ctx.guild_id is not None
     name = name.lower()
 
-    admin_query = (  # Allows admins to delete tags by name.
-        "DELETE FROM tags WHERE GuildID = $1 AND TagName = $2 RETURNING TagOwner;",
-        ctx.guild_id,
-        name,
-    )
+    select = "SELECT TagOwner FROM tags WHERE GuildID = $1 and TagName = $2;"
+    delete = "DELETE FROM tags WHERE GuildID = $1 AND TagName = $2;"
+    owner =  await bot.db.fetch_one(select, ctx.guild_id, name)
 
-    user_query = (  # Author must be the tag owner.
-        admin_query[0].replace("WHERE", "WHERE TagOwner = $3 AND"),
-        *admin_query[1:],
-        ctx.author.id,
-    )
+    if not owner:
+        # There is no tag with this name.
+        await ctx.respond(f"Failed to delete tag `{name}`. It doesn't exist.")
+        return None
 
-    # Fetch the member and permissions.
-    member = await bot.getch_member(ctx.guild_id, ctx.author.id)
-    permissions = await tanjun.utilities.fetch_permissions(ctx.client, member)
+    if not ctx.author.id == owner:
+        # Fetch the member and permissions.
+        member = await bot.rest.fetch_member(ctx.guild_id, ctx.author.id)
+        permissions = await tanjun.utilities.fetch_permissions(ctx.client, member)
 
-    if hikari.Permissions.ADMINISTRATOR in permissions:
-        # Use the admin query for admins.
-        if owner := await bot.db.fetch_one(*admin_query):
+        if hikari.Permissions.ADMINISTRATOR in permissions:
+            # Delete the tag, and announce admin perm usage.
+            await bot.db.execute(delete, ctx.guild_id, name)
             await ctx.respond(
                 f"<@!{member.id}> deleted the `{name}` tag "
                 f"(owned by <@!{owner}>) using admin perms."
             )
             return None
 
-    # Use the user query for regular users.
-    if owner := await bot.db.fetch_one(*user_query):
-        await ctx.respond(f"`{name}` tag deleted by <@!{ctx.author.id}>.")
+        # They don't own the tag, and are not administrator.
+        await ctx.respond(f"Failed to delete tag `{name}`. <@!{owner}> owns it, not you.")
         return None
 
-    # Author tried to delete a non-existent tag or tag they don't own.
-    await ctx.respond(f"Failed to delete `{name}`, it doesn't exist or you don't own it.")
+    # Successful deletion by the owner.
+    await bot.db.fetch_one(delete, ctx.guild_id, name)
+    await ctx.respond(f"`{name}` tag deleted by <@!{ctx.author.id}>.")
 
 
 @tanjun.as_loader
