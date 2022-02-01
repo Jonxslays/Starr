@@ -162,10 +162,10 @@ async def kick_slash_cmd(
         await bot.rest.kick_member(ctx.guild_id, member, reason=reason)
     except hikari.ForbiddenError:
         await ctx.respond(
-            f"Unable to kick <@!{member.id}>, I am missing permissions or my top role is too low."
+            f"Unable to kick <@{member.id}>, I am missing permissions or my top role is too low."
         )
     else:
-        await ctx.respond(f"Successfully kicked <@!{member.id}>.")
+        await ctx.respond(f"Successfully kicked <@{member.id}>.")
 
 
 async def _ban_member(
@@ -186,12 +186,10 @@ async def _ban_member(
             reason=reason + f" - banned by {ctx.author.username}",
         )
     except hikari.ForbiddenError:
-        message = (
-            f"Unable to ban <@!{member}>, I am missing permissions or my top role is too low."
-        )
+        message = f"Unable to ban <@{member}>, I am missing permissions or my top role is too low."
 
     else:
-        message = f"Successfully banned <@!{member}>" + (
+        message = f"Successfully banned <@{member}>" + (
             f", and deleted their messages from the past {delete_message_days} days."
             if delete_message_days
             else "."

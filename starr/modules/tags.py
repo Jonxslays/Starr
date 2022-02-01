@@ -103,7 +103,7 @@ async def tag_info_command(
             description=f"Requested tag: `{name}`",
             color=hikari.Color(0x19FA3B),
         )
-        .add_field("Owner", f"<@!{tag_name_info[0]}>", inline=True)
+        .add_field("Owner", f"<@{tag_name_info[0]}>", inline=True)
         .add_field("Uses", tag_name_info[1], inline=True)
     )
 
@@ -129,7 +129,7 @@ async def tag_list_command(
     fields: list[tuple[str, ...]] = []
 
     for tag in tags:
-        fields.append((tag[0], f"**Tag Owner**: <@!{tag[1]}>\n**Tag Uses**: {tag[2]}"))
+        fields.append((tag[0], f"**Tag Owner**: <@{tag[1]}>\n**Tag Uses**: {tag[2]}"))
 
     pag = models.Paginator(
         ctx,
@@ -174,7 +174,7 @@ async def tag_create_command(
         name,
     ):
         await ctx.respond(
-            f"Sorry, `{name}` was already created by <@!{owner}>. Try a different tag name.",
+            f"Sorry, `{name}` was already created by <@{owner}>. Try a different tag name.",
         )
         return None
 
@@ -187,7 +187,7 @@ async def tag_create_command(
         content,
     )
 
-    await ctx.respond(f"`{name}` tag created by <@!{ctx.author.id}>.")
+    await ctx.respond(f"`{name}` tag created by <@{ctx.author.id}>.")
 
 
 @tag_group.with_command
@@ -223,7 +223,7 @@ async def tag_edit_command(
             return None
 
         # Author doesn't own the tag
-        await ctx.respond(f"<@!{owner}> owns the `{name}` tag, you cannot edit it.")
+        await ctx.respond(f"<@{owner}> owns the `{name}` tag, you cannot edit it.")
         return None
 
     # There is no tag with that name, do they want to make one?
@@ -312,13 +312,11 @@ async def tag_transfer_command(
                 ctx.guild_id,
                 name,
             )
-            await ctx.respond(
-                f"`{name}` tag transferred from <@!{ctx.author.id}> to <@!{member}>."
-            )
+            await ctx.respond(f"`{name}` tag transferred from <@{ctx.author.id}> to <@{member}>.")
             return None
 
         # Can't transfer a tag they don't own
-        await ctx.respond(f"<@!{owner}> owns the `{name}` tag, you cannot transfer it.")
+        await ctx.respond(f"<@{owner}> owns the `{name}` tag, you cannot transfer it.")
         return None
 
     # Can't transfer a tag that doesn't exist
@@ -344,7 +342,7 @@ async def tag_delete_command(
 
     select = "SELECT TagOwner FROM tags WHERE GuildID = $1 and TagName = $2;"
     delete = "DELETE FROM tags WHERE GuildID = $1 AND TagName = $2;"
-    owner =  await bot.db.fetch_one(select, ctx.guild_id, name)
+    owner = await bot.db.fetch_one(select, ctx.guild_id, name)
 
     if not owner:
         # There is no tag with this name.
@@ -360,18 +358,18 @@ async def tag_delete_command(
             # Delete the tag, and announce admin perm usage.
             await bot.db.execute(delete, ctx.guild_id, name)
             await ctx.respond(
-                f"<@!{member.id}> deleted the `{name}` tag "
-                f"(owned by <@!{owner}>) using admin perms."
+                f"<@{member.id}> deleted the `{name}` tag "
+                f"(owned by <@{owner}>) using admin perms."
             )
             return None
 
         # They don't own the tag, and are not administrator.
-        await ctx.respond(f"Failed to delete tag `{name}`. <@!{owner}> owns it, not you.")
+        await ctx.respond(f"Failed to delete tag `{name}`. <@{owner}> owns it, not you.")
         return None
 
     # Successful deletion by the owner.
     await bot.db.fetch_one(delete, ctx.guild_id, name)
-    await ctx.respond(f"`{name}` tag deleted by <@!{ctx.author.id}>.")
+    await ctx.respond(f"`{name}` tag deleted by <@{ctx.author.id}>.")
 
 
 @tanjun.as_loader
