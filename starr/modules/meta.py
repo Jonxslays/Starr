@@ -59,18 +59,31 @@ async def ping_message_cmd(
     )
 
 
-async def _user_info(
-    ctx: tanjun.abc.Context,
-    member: hikari.Member | int,
-    bot: StarrBot,
+@meta.with_command
+@tanjun.with_member_slash_option("user", "The user to get info on.")
+@tanjun.as_slash_command("userinfo", "Get information about a user.")
+@utils.prepare_slash
+@meta.with_command
+@tanjun.with_argument("user", converters=int)
+@tanjun.with_parser
+@utils.with_help(
+    "Get information about a user.",
+    args=("user (int): The user to get info on.",),
+    usage="userinfo 1234567898769420",
+)
+@tanjun.as_message_command("userinfo")
+async def user_info_cmd(
+    ctx: tanjun.abc.SlashContext,
+    user: hikari.Member | int,
+    bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
     assert ctx.guild_id is not None
 
-    if isinstance(member, int):
-        member = await bot.rest.fetch_member(ctx.guild_id, member)
+    if isinstance(user, int):
+        user = await bot.rest.fetch_member(ctx.guild_id, user)
 
     color = None
-    if roles := member.get_roles():
+    if roles := user.get_roles():
         roles = sorted(roles, key=lambda r: r.position, reverse=True)
 
         for role in roles:
@@ -83,65 +96,25 @@ async def _user_info(
 
     e = (
         hikari.Embed(
-            title=f"User info for {member}",
-            description=f"ID: {member.id}",
+            title=f"User info for {user}",
+            description=f"ID: {user.id}",
             color=color,
             timestamp=datetime.datetime.now(datetime.timezone.utc),
         )
-        .set_thumbnail(member.avatar_url or member.default_avatar_url)
-        .set_image(member.banner_url)
+        .set_thumbnail(user.avatar_url or user.default_avatar_url)
+        .set_image(user.banner_url)
         .add_field(
             "Created on",
-            f"{from_datetime(member.created_at)} ({from_datetime(member.created_at, style='R')})",
+            f"{from_datetime(user.created_at)} ({from_datetime(user.created_at, style='R')})",
         )
         .add_field(
             "Joined on",
-            f"{from_datetime(member.joined_at)} ({from_datetime(member.joined_at, style='R')})",
+            f"{from_datetime(user.joined_at)} ({from_datetime(user.joined_at, style='R')})",
         )
         .add_field("Roles", ", ".join(r.mention for r in roles) or "No roles?")
     )
 
-    if presence := member.get_presence():
-        if presence.activities:
-            activity = presence.activities[0]
-            activity_type = hikari.ActivityType(activity.type).name.title()
-            value = (
-                ("" if "custom" in activity_type.lower() else activity_type) + " " + activity.name
-            )
-
-            e.add_field("Activity", value, inline=True)
-
-        e.add_field("Status", str(presence.visible_status), inline=True)
-
     await ctx.respond(e)
-
-
-@meta.with_command
-@tanjun.with_argument("user", converters=int)
-@tanjun.with_parser
-@utils.with_help(
-    "Get information about a user.",
-    args=("user (int): The user to get info on.",),
-    usage="userinfo 1234567898769420",
-)
-@tanjun.as_message_command("userinfo")
-async def user_info_cmd(
-    ctx: tanjun.abc.MessageContext,
-    user: int,
-    bot: StarrBot = tanjun.inject(type=StarrBot),
-) -> None:
-    await _user_info(ctx, user, bot)
-
-
-@meta.with_command
-@tanjun.with_member_slash_option("user", "The user to get info on.")
-@tanjun.as_slash_command("userinfo", "Get information about a user.")
-async def user_info_slash_cmd(
-    ctx: tanjun.abc.SlashContext,
-    user: hikari.Member,
-    bot: StarrBot = tanjun.inject(type=StarrBot),
-) -> None:
-    await _user_info(ctx, user, bot)
 
 
 @tanjun.as_loader

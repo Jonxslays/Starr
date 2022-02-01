@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        session: [types, formatting, imports, licensing]
+        session: [types_mypy, types_pyright, formatting, imports, licensing]
     runs-on: ubuntu-latest
 
     steps:
