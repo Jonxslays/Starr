@@ -44,23 +44,33 @@ def get_dependencies() -> dict[str, str]:
         deps.update(data["dependencies"])
         deps["hikari"] = deps["hikari"]["version"]
 
-    return dict((k.lower(), f"{k + v}") for k, v in deps.items())
+    return dict((k.lower(), f"{k}{v}") for k, v in deps.items())
 
 
 DEPS = get_dependencies()
 
 
 @nox.session(reuse_venv=True)
-def types(session: nox.Session) -> None:
+def types_mypy(session: nox.Session) -> None:
     session.install(
         "-U",
-        DEPS["pyright"],
         DEPS["mypy"],
         DEPS["hikari"],
         DEPS["hikari-tanjun"],
         DEPS["python-dotenv"],
     )
     session.run("mypy", "starr")
+
+
+@nox.session(reuse_venv=True)
+def types_pyright(session: nox.Session) -> None:
+    session.install(
+        "-U",
+        DEPS["pyright"],
+        DEPS["hikari"],
+        DEPS["hikari-tanjun"],
+        DEPS["python-dotenv"],
+    )
     session.run("pyright")
 
 

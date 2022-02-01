@@ -114,18 +114,6 @@ async def user_info_cmd(
         .add_field("Roles", ", ".join(r.mention for r in roles) or "No roles?")
     )
 
-    if presence := user.get_presence():
-        if presence.activities:
-            activity = presence.activities[0]
-            activity_type = hikari.ActivityType(activity.type).name.title()
-            value = (
-                ("" if "custom" in activity_type.lower() else activity_type) + " " + activity.name
-            )
-
-            e.add_field("Activity", value, inline=True)
-
-        e.add_field("Status", str(presence.visible_status), inline=True)
-
     await ctx.respond(e)
 
 
