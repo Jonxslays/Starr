@@ -345,35 +345,38 @@ class StarboardMessage:
         cls,
         rest: hikari.api.RESTClient,
         db: Database,
-        origial_message: hikari.Message,
+        original_message: hikari.Message,
         count: int,
         guild: StarrGuild,
     ) -> hikari.Message:
         embed = (
             hikari.Embed(
                 title=f"Jump to message",
-                url=origial_message.make_link(guild.guild_id),
+                url=original_message.make_link(guild.guild_id),
                 color=hikari.Color.from_hex_code("#fcd303"),
-                description=origial_message.content,
-                timestamp=origial_message.timestamp,
+                description=original_message.content,
+                timestamp=original_message.timestamp,
             )
             .set_author(
-                name=f"{origial_message.author.username}#{origial_message.author.discriminator}",
-                icon=origial_message.author.avatar_url
-                or origial_message.author.default_avatar_url,
+                name=f"{original_message.author.username}#{original_message.author.discriminator}",
+                icon=original_message.author.avatar_url
+                or original_message.author.default_avatar_url,
             )
-            .set_footer(text=f"ID: {origial_message.id}")
+            .set_footer(text=f"ID: {original_message.id}")
         )
 
-        if origial_message.attachments:
-            embed.set_image(origial_message.attachments[0])
+        embeds = [embed]
+        embeds.extend(original_message.embeds)
+
+        if original_message.attachments:
+            embed.set_image(original_message.attachments[0])
 
         new_message = await rest.create_message(
             content=f"You're a \u2B50 x{count}!\n",
             channel=guild.star_channel,
-            embed=embed,
+            embeds=embeds[0:10],
         )
 
-        starboard_message = cls(new_message.id, origial_message.id, guild)
+        starboard_message = cls(new_message.id, original_message.id, guild)
         await starboard_message.db_insert(db)
         return new_message
