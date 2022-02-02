@@ -45,6 +45,7 @@ RESERVED_TAGS = (
     "info",
     "list",
     "transfer",
+    "claim",
 )
 
 tags_component = tanjun.Component(name="tags")
