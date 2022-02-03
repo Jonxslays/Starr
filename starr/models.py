@@ -365,16 +365,13 @@ class StarboardMessage:
             .set_footer(text=f"ID: {original_message.id}")
         )
 
-        embeds = [embed]
-        embeds.extend(original_message.embeds)
-
         if original_message.attachments:
             embed.set_image(original_message.attachments[0])
 
         new_message = await rest.create_message(
             content=f"You're a \u2B50 x{count}!\n",
             channel=guild.star_channel,
-            embeds=embeds[0:10],
+            embeds=(embed, *original_message.embeds[0:9]),
         )
 
         starboard_message = cls(new_message.id, original_message.id, guild)
