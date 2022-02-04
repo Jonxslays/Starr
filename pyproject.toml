@@ -21,7 +21,7 @@ extras = ["speedups"]
 
 [tool.poetry.dev-dependencies]
 black = "==22.1"
-mypy = "==0.910"
+mypy = "==0.931"
 nox = "==2022.1.7"
 pyright = "==0.0.13"
 len8 = "==0.7.0"
