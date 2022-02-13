@@ -12,11 +12,11 @@ license = "BSD-3-Clause"
 python = ">=3.10,<3.11"
 asyncpg = "==0.25.0"
 python-dotenv = "==0.19.2"
-hikari-tanjun = "==2.3.0a1"
+hikari-tanjun = "==2.4.0a1"
 uvloop = "==0.16.0"
 
 [tool.poetry.dependencies.hikari]
-version = "==2.0.0.dev105"
+version = "==2.0.0.dev106"
 extras = ["speedups"]
 
 [tool.poetry.dev-dependencies]

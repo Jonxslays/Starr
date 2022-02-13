@@ -130,10 +130,7 @@ class Paginator:
 
         for key, button in buttons.items():
             style = hikari.ButtonStyle.PRIMARY if key != "stop" else hikari.ButtonStyle.DANGER
-            # The type ignore can be removed when dev 106 releases.
-            row.add_button(style, f"{self.id_hash}-{key}").set_emoji(  # type: ignore
-                button
-            ).add_to_container()
+            row.add_button(style, f"{self.id_hash}-{key}").set_emoji(button).add_to_container()
 
         return [row]
 

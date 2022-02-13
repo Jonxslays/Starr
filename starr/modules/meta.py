@@ -111,7 +111,12 @@ async def user_info_cmd(
             "Joined on",
             f"{from_datetime(user.joined_at)} ({from_datetime(user.joined_at, style='R')})",
         )
-        .add_field("Roles", ", ".join(r.mention for r in roles) or "No roles?")
+        .add_field(
+            "Roles",
+            ", ".join(
+                (r.mention if ctx.guild_id != r.id else "@everyone" for r in roles) or "No roles?"
+            ),
+        )
     )
 
     await ctx.respond(e)
