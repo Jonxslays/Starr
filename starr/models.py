@@ -267,12 +267,16 @@ class StarrGuild:
         )
 
     async def remove_channel_from_blacklist(self, db: Database, channel_id: int) -> None:
-        self._star_blacklist.remove(channel_id)
-        await db.execute(
-            "UPDATE guilds " "SET StarBlacklist = $1 " "WHERE GuildID = $2;",
-            self._star_blacklist,
-            self._guild_id,
-        )
+        try:
+            self._star_blacklist.remove(channel_id)
+        except ValueError:
+            pass
+        else:
+            await db.execute(
+                "UPDATE guilds SET StarBlacklist = $1 WHERE GuildID = $2;",
+                self._star_blacklist,
+                self._guild_id,
+            )
 
 
 class StarboardMessage:
