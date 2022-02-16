@@ -54,8 +54,9 @@ async def get_reaction_event_info(
         # if not cached.
         guild = await StarrGuild.from_db(bot.db, event.guild_id)
 
-    if not guild.star_channel:
-        # The guild hasn't configured their starboard yet.
+    if not guild.star_channel or event.channel_id in guild.star_blacklist:
+        # The guild hasn't configured their starboard yet
+        # or this channel is in their starboard blacklist.
         return None
 
     try:

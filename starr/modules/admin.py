@@ -56,6 +56,18 @@ config = admin.with_slash_command(
 
 
 @config.with_command
+@tanjun.with_channel_slash_option(
+    "blacklist",
+    "Adds a channel to the starboard blacklist.",
+    types=(hikari.GuildTextChannel,),
+    default=None,
+)
+@tanjun.with_channel_slash_option(
+    "whitelist",
+    "Adds a channel to the starboard blacklist.",
+    types=(hikari.GuildTextChannel,),
+    default=None,
+)
 @tanjun.with_int_slash_option(
     "threshold", "Sets the number of stars a message must receive.", default=0, min_value=1
 )
@@ -67,6 +79,8 @@ async def configure_starboard_cmd(
     ctx: tanjun.abc.SlashContext,
     threshold: int,
     channel: hikari.InteractionChannel | None,
+    blacklist: hikari.InteractionChannel | None,
+    whitelist: hikari.InteractionChannel | None,
     bot: StarrBot = tanjun.inject(type=StarrBot),
 ) -> None:
     assert ctx.guild_id is not None
@@ -93,6 +107,14 @@ async def configure_starboard_cmd(
             ctx.guild_id,
         )
         responses.append(f"Successfully updated starboard star threshold to {threshold}.")
+
+    if whitelist:
+        await guild.remove_channel_from_blacklist(bot.db, whitelist.id)
+        responses.append(f"Successfully whitelisted <#{whitelist.id}> for starboard activity.")
+
+    if blacklist:
+        await guild.add_channel_to_blacklist(bot.db, blacklist.id)
+        responses.append(f"Successfully blacklisted <#{blacklist.id}> from starboard activity.")
 
     if responses:
         await ctx.respond("\n".join(responses))

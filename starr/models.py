@@ -191,7 +191,7 @@ class Paginator:
 
 class StarrGuild:
 
-    __slots__ = ("_guild_id", "_prefix", "_star_channel", "_threshold")
+    __slots__ = ("_guild_id", "_prefix", "_star_channel", "_threshold", "_star_blacklist")
 
     def __init__(
         self,
@@ -199,11 +199,13 @@ class StarrGuild:
         prefix: str,
         star_channel: int = 0,
         threshold: int = 5,
+        star_blacklist: list[int] = [],
     ) -> None:
         self._guild_id = guild_id
         self._prefix = prefix
         self._star_channel = star_channel
         self._threshold = threshold
+        self._star_blacklist = star_blacklist
 
     @property
     def guild_id(self) -> int:
@@ -224,6 +226,10 @@ class StarrGuild:
     @star_channel.setter
     def star_channel(self, value: int) -> None:
         self._star_channel = value
+
+    @property
+    def star_blacklist(self) -> list[int]:
+        return self._star_blacklist
 
     @property
     def threshold(self) -> int:
@@ -249,6 +255,24 @@ class StarrGuild:
             return await cls.from_db(db, guild_id)
 
         return cls(*data)
+
+    async def add_channel_to_blacklist(self, db: Database, channel_id: int) -> None:
+        self._star_blacklist.append(channel_id)
+        await db.execute(
+            "UPDATE guilds "
+            "SET StarBlacklist = array_append(StarBlacklist, $1) "
+            "WHERE GuildID = $2;",
+            channel_id,
+            self._guild_id,
+        )
+
+    async def remove_channel_from_blacklist(self, db: Database, channel_id: int) -> None:
+        self._star_blacklist.remove(channel_id)
+        await db.execute(
+            "UPDATE guilds " "SET StarBlacklist = $1 " "WHERE GuildID = $2;",
+            self._star_blacklist,
+            self._guild_id,
+        )
 
 
 class StarboardMessage:
