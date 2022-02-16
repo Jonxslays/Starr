@@ -59,13 +59,13 @@ config = admin.with_slash_command(
 @tanjun.with_channel_slash_option(
     "blacklist",
     "Adds a channel to the starboard blacklist.",
-    types=(hikari.GuildTextChannel, hikari.GuildNewsChannel),
+    types=[hikari.GuildTextChannel, hikari.GuildNewsChannel],
     default=None,
 )
 @tanjun.with_channel_slash_option(
     "whitelist",
     "Adds a channel to the starboard whitelist.",
-    types=(hikari.GuildTextChannel, hikari.GuildNewsChannel),
+    types=[hikari.GuildTextChannel, hikari.GuildNewsChannel],
     default=None,
 )
 @tanjun.with_int_slash_option(
