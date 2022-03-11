@@ -374,9 +374,11 @@ class StarboardMessage:
         count: int,
         guild: StarrGuild,
     ) -> hikari.Message:
+        reference_channel = await rest.fetch_channel(original_message.channel_id)
+
         embed = (
             hikari.Embed(
-                title=f"Jump to message",
+                title=f"Jump to message in #{reference_channel.name}",
                 url=original_message.make_link(guild.guild_id),
                 color=hikari.Color.from_hex_code("#fcd303"),
                 description=original_message.content,
