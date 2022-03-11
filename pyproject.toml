@@ -23,7 +23,7 @@ extras = ["speedups"]
 black = "==22.1"
 mypy = "==0.931"
 nox = "==2022.1.7"
-pyright = "==1.1.226"
+pyright = "==1.1.228"
 len8 = "==0.7.2"
 flake8 = "==4.0.1"
 isort = "==5.10.1"
