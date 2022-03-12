@@ -34,64 +34,73 @@ from __future__ import annotations
 import datetime
 
 import hikari
-import tanjun
+import lightbulb
 
+from starr import utils
 from starr.bot import StarrBot
 from starr.models import StarrGuild
 
-admin = tanjun.Component(name="admin").add_check(
-    tanjun.checks.AuthorPermissionCheck(
-        hikari.Permissions.ADMINISTRATOR,
-        error_message="You're not allowed to do that.",
-    )
-)
+admin = utils.Plugin("admin", "Admin related commands.")
+admin.add_checks(lightbulb.has_guild_permissions(hikari.Permissions.ADMINISTRATOR))
+
 
 ########################################################################
 # START CONFIG
 ########################################################################
 
-config = admin.with_slash_command(
-    tanjun.slash_command_group("config", "Starr configuration options.")
-)
+
+@admin.command
+@lightbulb.set_help(docstring=True)
+@lightbulb.command("config", "Starr configuration options.")
+@lightbulb.implements(lightbulb.SlashCommandGroup)
+async def config_cmd(_: utils.SlashContext) -> None:
+    """This command can only be used by administrators."""
+    ...
 
 
-@config.with_command
-@tanjun.with_channel_slash_option(
+@config_cmd.child
+@lightbulb.option(
     "blacklist",
     "Adds a channel to the starboard blacklist.",
-    types=[hikari.GuildTextChannel, hikari.GuildNewsChannel],
+    type=hikari.TextableGuildChannel,
+    channel_types=(hikari.ChannelType.GUILD_NEWS, hikari.ChannelType.GUILD_TEXT),
     default=None,
 )
-@tanjun.with_channel_slash_option(
+@lightbulb.option(
     "whitelist",
     "Adds a channel to the starboard whitelist.",
-    types=[hikari.GuildTextChannel, hikari.GuildNewsChannel],
+    type=hikari.TextableGuildChannel,
+    channel_types=(hikari.ChannelType.GUILD_NEWS, hikari.ChannelType.GUILD_TEXT),
     default=None,
 )
-@tanjun.with_int_slash_option(
-    "threshold", "Sets the number of stars a message must receive.", default=0, min_value=1
+@lightbulb.option(
+    "threshold",
+    "Sets the number of stars a message must receive.",
+    type=int,
+    default=0,
+    min_value=1,
 )
-@tanjun.with_channel_slash_option(
-    "channel", "Sets the starboard channel.", types=(hikari.GuildTextChannel,), default=None
+@lightbulb.option(
+    "channel",
+    "Sets the starboard channel.",
+    type=hikari.TextableGuildChannel,
+    channel_types=(hikari.ChannelType.GUILD_TEXT,),
+    default=None,
 )
-@tanjun.as_slash_command("starboard", "Configures Starr for this guild.")
-async def configure_starboard_cmd(
-    ctx: tanjun.abc.SlashContext,
-    threshold: int,
-    channel: hikari.InteractionChannel | None,
-    blacklist: hikari.InteractionChannel | None,
-    whitelist: hikari.InteractionChannel | None,
-    bot: StarrBot = tanjun.inject(type=StarrBot),
-) -> None:
-    assert ctx.guild_id is not None
-
+@lightbulb.command("starboard", "Configures the starboard for this guild.")
+@lightbulb.implements(lightbulb.SlashSubCommand)
+async def configure_starboard_cmd(ctx: utils.SlashContext) -> None:
     responses: list[str] = []
-    guild = bot.guilds[ctx.guild_id]
+    blacklist = ctx.options.blacklist
+    whitelist = ctx.options.whitelist
+    threshold = ctx.options.threshold
+    channel = ctx.options.channel
+    guild = ctx.bot.guilds[ctx.guild_id]
 
     if channel:
         guild.star_channel = channel.id
 
-        await bot.db.execute(
+        await ctx.bot.db.execute(
             "UPDATE guilds SET StarChannel = $1 WHERE GuildID = $2;",
             channel.id,
             ctx.guild_id,
@@ -101,7 +110,7 @@ async def configure_starboard_cmd(
     if threshold:
         guild.threshold = threshold
 
-        await bot.db.execute(
+        await ctx.bot.db.execute(
             "UPDATE guilds SET Threshold = $1 WHERE GuildID = $2;",
             threshold,
             ctx.guild_id,
@@ -109,11 +118,11 @@ async def configure_starboard_cmd(
         responses.append(f"Successfully updated starboard star threshold to {threshold}.")
 
     if whitelist:
-        await guild.remove_channel_from_blacklist(bot.db, whitelist.id)
+        await guild.remove_channel_from_blacklist(ctx.bot.db, whitelist.id)
         responses.append(f"Successfully whitelisted <#{whitelist.id}> for starboard activity.")
 
     if blacklist:
-        await guild.add_channel_to_blacklist(bot.db, blacklist.id)
+        await guild.add_channel_to_blacklist(ctx.bot.db, blacklist.id)
         responses.append(f"Successfully blacklisted <#{blacklist.id}> from starboard activity.")
 
     if responses:
@@ -122,33 +131,28 @@ async def configure_starboard_cmd(
         await ctx.respond("Nothing happened...")
 
 
-@config.with_command
-@tanjun.with_str_slash_option("value", "The new prefix to set.")
-@tanjun.as_slash_command("prefix", "Configures message command prefix for this guild.")
-async def configure_prefix_cmd(
-    ctx: tanjun.abc.SlashContext,
-    value: str,
-    bot: StarrBot = tanjun.inject(type=StarrBot),
-) -> None:
-    assert ctx.guild_id is not None
-    await bot.db.fetch_row(
+@config_cmd.child
+@lightbulb.option("value", "The new prefix to set.")
+@lightbulb.command("prefix", "Configures command prefix for this guild.")
+@lightbulb.implements(lightbulb.SlashSubCommand)
+async def configure_prefix_cmd(ctx: utils.SlashContext) -> None:
+    value = ctx.options.value
+
+    await ctx.bot.db.execute(
         "UPDATE guilds SET Prefix = $1 WHERE GuildID = $2;", value, ctx.guild_id
     )
 
-    guild = bot.guilds[ctx.guild_id]
+    guild = ctx.bot.guilds[ctx.guild_id]
     guild.prefix = value
 
-    await ctx.respond(f"Successfully updated message command prefix to `{value}`.")
+    await ctx.respond(f"Successfully updated command prefix to `{value}`.")
 
 
-@config.with_command
-@tanjun.as_slash_command("list", "List the configurations for this guild.")
-async def configure_list_cmd(
-    ctx: tanjun.abc.SlashContext,
-    bot: StarrBot = tanjun.inject(type=StarrBot),
-) -> None:
-    assert ctx.guild_id is not None
-    guild = await StarrGuild.from_db(bot.db, ctx.guild_id)
+@config_cmd.child
+@lightbulb.command("list", "List the configurations for this guild.")
+@lightbulb.implements(lightbulb.SlashSubCommand)
+async def configure_list_cmd(ctx: utils.SlashContext) -> None:
+    guild = await StarrGuild.from_db(ctx.bot.db, ctx.guild_id)
     name = g.name if (g := ctx.get_guild()) else "this guild"
 
     await ctx.respond(
@@ -163,144 +167,5 @@ async def configure_list_cmd(
     )
 
 
-########################################################################
-# END CONFIG
-########################################################################
-
-
-@admin.with_command
-@tanjun.with_str_slash_option("reason", "The optional reason to add to the audit log.", default="")
-@tanjun.with_member_slash_option("member", "The member to kick.")
-@tanjun.as_slash_command("kick", "Kick a member from the guild.", always_defer=True)
-async def kick_slash_cmd(
-    ctx: tanjun.abc.SlashContext,
-    member: hikari.Member,
-    reason: str,
-    bot: StarrBot = tanjun.inject(type=StarrBot),
-) -> None:
-    assert ctx.guild_id is not None
-
-    try:
-        await bot.rest.kick_member(ctx.guild_id, member, reason=reason)
-    except hikari.ForbiddenError:
-        await ctx.respond(
-            f"Unable to kick <@{member.id}>, I am missing permissions or my top role is too low."
-        )
-    else:
-        await ctx.respond(f"Successfully kicked <@{member.id}>.")
-
-
-async def _ban_member(
-    ctx: tanjun.abc.SlashContext,
-    member: hikari.SnowflakeishOr[hikari.Member],
-    reason: str,
-    delete_message_days: int,
-    bot: StarrBot,
-) -> str:
-    assert ctx.guild_id is not None
-    member = member.id if isinstance(member, hikari.Member) else member
-
-    try:
-        await bot.rest.ban_member(
-            ctx.guild_id,
-            member,
-            delete_message_days=delete_message_days,
-            reason=reason + f" - banned by {ctx.author.username}",
-        )
-    except hikari.ForbiddenError:
-        message = f"Unable to ban <@{member}>, I am missing permissions or my top role is too low."
-
-    else:
-        message = f"Successfully banned <@{member}>" + (
-            f", and deleted their messages from the past {delete_message_days} days."
-            if delete_message_days
-            else "."
-        )
-
-    return message
-
-
-@admin.with_command
-@tanjun.with_int_slash_option(
-    "delete_message_days",
-    "The number of days to delete messages from this member.",
-    default=0,
-    min_value=0,
-    max_value=7,
-)
-@tanjun.with_str_slash_option("reason", "The optional reason to add to the audit log.", default="")
-@tanjun.with_member_slash_option("member", "The member to ban.")
-@tanjun.as_slash_command("ban", "Ban a member from the guild.", always_defer=True)
-async def ban_slash_cmd(
-    ctx: tanjun.abc.SlashContext,
-    member: hikari.Member,
-    reason: str,
-    delete_message_days: int,
-    bot: StarrBot = tanjun.inject(type=StarrBot),
-) -> None:
-    await ctx.respond(await _ban_member(ctx, member, reason, delete_message_days, bot))
-
-
-@admin.with_command
-@tanjun.with_int_slash_option(
-    "delete_message_days",
-    "The number of days to delete messages from this member.",
-    default=0,
-    min_value=0,
-    max_value=7,
-)
-@tanjun.with_str_slash_option("reason", "The optional reason to add to the audit log.", default="")
-@tanjun.with_member_slash_option("member", "The member to softban.")
-@tanjun.as_slash_command(
-    "softban", "Ban a member from the guild, and immediately unban them.", always_defer=True
-)
-async def softban_slash_cmd(
-    ctx: tanjun.abc.SlashContext,
-    member: hikari.Member,
-    reason: str,
-    delete_message_days: int,
-    bot: StarrBot = tanjun.inject(type=StarrBot),
-) -> None:
-    assert ctx.guild_id is not None
-
-    message = await _ban_member(ctx, member, reason, delete_message_days, bot)
-    await bot.rest.unban_member(
-        ctx.guild_id, member, reason=f"softban release by {ctx.author.username}"
-    )
-
-    await ctx.respond(message.replace("banned", "softbanned"))
-
-
-@admin.with_command
-@tanjun.with_int_slash_option(
-    "delete_message_days",
-    "The number of days to delete messages from this member.",
-    default=0,
-    min_value=0,
-    max_value=7,
-)
-@tanjun.with_str_slash_option("reason", "The optional reason to add to the audit log.", default="")
-@tanjun.with_str_slash_option(
-    "member", "The member to ban's Snowflake ID.", converters=tanjun.to_snowflake
-)
-@tanjun.as_slash_command("hackban", "Ban a member from the guild by ID.", always_defer=True)
-async def hackban_slash_cmd(
-    ctx: tanjun.abc.SlashContext,
-    member: hikari.Snowflake,
-    reason: str,
-    delete_message_days: int,
-    bot: StarrBot = tanjun.inject(type=StarrBot),
-) -> None:
-    try:
-        message = await _ban_member(ctx, member, reason, delete_message_days, bot)
-    except hikari.NotFoundError:
-        message = f"Hackban failed - invalid user ID: {member}."
-    else:
-        message = message.replace("banned", "hackbanned")
-
-    await ctx.respond(message)
-
-
-@tanjun.as_loader
-def load_component(client: tanjun.Client) -> None:
-    client.add_component(admin.copy())
+def load(bot: StarrBot) -> None:
+    bot.add_plugin(admin)

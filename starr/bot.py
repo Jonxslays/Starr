@@ -31,22 +31,19 @@
 
 from __future__ import annotations
 
-import typing as t
 from os import environ
-from pathlib import Path
 
+import aiohttp
 import hikari
-import tanjun
+import lightbulb
 
 from starr.db import Database
 from starr.models import StarrGuild
 
-SubscriptionsT = dict[t.Type[hikari.Event], t.Callable[..., t.Coroutine[t.Any, t.Any, None]]]
 
+class StarrBot(lightbulb.BotApp):
 
-class StarrBot(hikari.GatewayBot):
-
-    __slots__ = ("star", "db", "guilds", "log", "client", "my_id")
+    __slots__ = ("star", "db", "guilds", "log", "client", "my_id", "session")
 
     def __init__(self) -> None:
         super().__init__(
@@ -54,27 +51,19 @@ class StarrBot(hikari.GatewayBot):
             intents=hikari.Intents.GUILDS
             | hikari.Intents.GUILD_MESSAGE_REACTIONS
             | hikari.Intents.GUILD_MESSAGES,
+            prefix=lightbulb.when_mentioned_or(self.resolve_prefix),
+            case_insensitive_prefix_commands=True,
+            owner_ids=(452940863052578816,),
+            default_enabled_guilds=(
+                (int(environ["DEV"]),)
+                if not int(environ["IS_PROD"])
+                else tuple(int(i) for i in (environ["DEV"], environ["PROD"]))
+            ),
         )
 
-        default_guilds = (
-            (environ["DEV"], environ["PROD"]) if int(environ["IS_PROD"]) else (environ["DEV"],)
-        )
-
-        self.star = "\u2B50"
         self.db = Database()
+        self.check(lightbulb.guild_only)
         self.guilds: dict[int, StarrGuild] = {}
-        self.client = (
-            tanjun.Client.from_gateway_bot(
-                self,
-                mention_prefix=True,
-                declare_global_commands=tuple(map(int, default_guilds)),
-            )
-            # .set_hooks(ErrorHooks) # FIXME: stops error parsing?
-            .add_check(tanjun.checks.GuildCheck())
-            .set_prefix_getter(self.resolve_prefix)
-            .load_modules(*Path("./starr/modules").glob("[!_]*.py"))
-            .set_auto_defer_after(2)
-        )
 
         self.subscribe(hikari.StartingEvent, self.on_starting)
         self.subscribe(hikari.StartedEvent, self.on_started)
@@ -82,13 +71,10 @@ class StarrBot(hikari.GatewayBot):
         self.subscribe(hikari.GuildAvailableEvent, self.on_guild_available)
         self.subscribe(hikari.GuildJoinEvent, self.on_guild_available)
 
-    async def getch_member(self, guild_id: int, member_id: int) -> hikari.Member:
-        return self.cache.get_member(guild_id, member_id) or await self.rest.fetch_member(
-            guild_id, member_id
-        )
-
     async def on_starting(self, _: hikari.StartingEvent) -> None:
         await self.db.connect()
+        self.session = aiohttp.ClientSession()
+        self.load_extensions_from("./starr/modules")
 
     async def on_started(self, _: hikari.StartedEvent) -> None:
         if data := await self.db.fetch_rows("SELECT * FROM guilds;"):
@@ -100,6 +86,7 @@ class StarrBot(hikari.GatewayBot):
 
     async def on_stopped(self, _: hikari.StoppingEvent) -> None:
         await self.db.close()
+        await self.session.close()
 
     async def on_guild_available(
         self, event: hikari.GuildAvailableEvent | hikari.GuildJoinEvent
@@ -108,8 +95,10 @@ class StarrBot(hikari.GatewayBot):
             guild = await StarrGuild.default_with_insert(self.db, event.guild_id)
             self.guilds[guild.guild_id] = guild
 
-    async def resolve_prefix(self, ctx: tanjun.context.MessageContext) -> tuple[str, ...]:
-        if ctx.guild_id and (guild := self.guilds.get(ctx.guild_id)):
+    async def resolve_prefix(self, _: lightbulb.BotApp, message: hikari.Message) -> tuple[str]:
+        assert message.guild_id is not None
+
+        if guild := self.guilds.get(message.guild_id):
             return (guild.prefix,)
 
-        return ("./",)
+        return ("$",)

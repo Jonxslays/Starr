@@ -31,6 +31,7 @@
 
 from __future__ import annotations
 
+import functools
 from pathlib import Path
 from typing import Callable
 
@@ -50,24 +51,24 @@ with open("pyproject.toml") as f:
 
 def install(*packages: str) -> InjectorT:
     def inner(func: SessionT) -> SessionT:
+        @functools.wraps(func)
         def wrapper(session: nox.Session) -> None:
             session.install("-U", *(DEPS[p] for p in packages))
             return func(session)
 
-        wrapper.__name__ = func.__name__
         return wrapper
 
     return inner
 
 
 @nox.session(reuse_venv=True)
-@install("mypy", "hikari", "hikari-tanjun", "hikari-lightbulb", "python-dotenv")
+@install("mypy", "hikari", "hikari-lightbulb", "python-dotenv")
 def types_mypy(session: nox.Session) -> None:
     session.run("mypy", "starr")
 
 
 @nox.session(reuse_venv=True)
-@install("pyright", "hikari", "hikari-tanjun", "hikari-lightbulb", "python-dotenv")
+@install("pyright", "hikari", "hikari-lightbulb", "python-dotenv")
 def types_pyright(session: nox.Session) -> None:
     session.run("pyright")
 

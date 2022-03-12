@@ -19,3 +19,12 @@ CREATE TABLE IF NOT EXISTS tags (
     Uses BIGINT DEFAULT 0,
     PRIMARY KEY (GuildID, TagName)
 );
+
+CREATE TABLE IF NOT EXISTS tag_aliases (
+    TagName TEXT,
+    TagAlias TEXT,
+    GuildID BIGINT,
+    PRIMARY KEY (GuildID, TagAlias),
+    FOREIGN KEY (GuildID, TagName)
+    REFERENCES tags (GuildID, TagName)
+);
