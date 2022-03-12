@@ -252,6 +252,13 @@ async def tag_create_command(ctx: utils.PrefixContext) -> None:
     """
     name = ctx.options.name.lower()
     content = ctx.options.content
+    query = (
+        "UPDATE tags SET uses = uses + 1 "
+        "FROM tag_aliases a WHERE tags.guildid = $1 "
+        "AND tags.tagname = $2 "
+        "OR (a.tagalias = $2 AND tags.tagname = a.tagname) "
+        "RETURNING tags.tagowner;"
+    )
 
     # Can't create a reserved tag
     if name in RESERVED_TAGS:
@@ -261,11 +268,7 @@ async def tag_create_command(ctx: utils.PrefixContext) -> None:
         return None
 
     # If they try to make an existing tag, yeah thats a use :kek:
-    if owner := await ctx.bot.db.fetch_one(
-        "UPDATE tags SET Uses = Uses + 1 WHERE GuildID = $1 AND TagName = $2 RETURNING TagOwner;",
-        ctx.guild_id,
-        name,
-    ):
+    if owner := await ctx.bot.db.fetch_one(query, ctx.guild_id, name):
         await ctx.respond(
             f"Sorry, `{name}` was already created by <@{owner}>. Try a different tag name.",
         )
