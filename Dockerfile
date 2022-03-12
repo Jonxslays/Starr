@@ -1,4 +1,4 @@
-FROM python:3.10.0-slim-buster
+FROM python:3.10.2-slim-buster
 
 RUN apt-get update && apt-get -y install curl gcc python3-dev build-essential libssl-dev libffi-dev
 RUN curl -sSL https://install.python-poetry.org | python3 -
