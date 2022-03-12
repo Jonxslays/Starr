@@ -35,52 +35,37 @@ import datetime
 import time
 
 import hikari
-import tanjun
-from tanjun.conversion import from_datetime
+import lightbulb
 
 from starr import utils
 from starr.bot import StarrBot
 
-meta = tanjun.Component(name="meta")
+meta = utils.Plugin("meta", "Statistical commands.")
 
 
-@meta.with_command
-@utils.with_help("Returns Starr's latency.", usage="ping")
-@tanjun.as_message_command("ping")
-async def ping_message_cmd(
-    ctx: tanjun.abc.Context, bot: StarrBot = tanjun.inject(type=StarrBot)
-) -> None:
+@meta.command
+@lightbulb.set_help(docstring=True)
+@lightbulb.command("ping", "Starr's latency.")
+@lightbulb.implements(lightbulb.PrefixCommand)
+async def ping_command(ctx: utils.PrefixContext) -> None:
+    """Why is Starr so slow?"""
     start = time.perf_counter()
-    message = await ctx.respond(".", ensure_result=True)
+    await ctx.respond("wait what...")
     elapsed = time.perf_counter() - start
 
-    await message.edit(
-        f"**Gateway**: {bot.heartbeat_latency * 1000:,.0f} ms\n**REST**: {elapsed * 1000:,.0f} ms"
+    await ctx.edit_last_response(
+        f"Gateway: {ctx.bot.heartbeat_latency * 1000:,.0f} ms\nRest: {elapsed * 1000:,.0f} ms"
     )
 
 
-@meta.with_command
-@tanjun.with_member_slash_option("user", "The user to get info on.")
-@tanjun.as_slash_command("userinfo", "Get information about a user.")
-@utils.prepare_slash
-@meta.with_command
-@tanjun.with_argument("user", converters=int)
-@tanjun.with_parser
-@utils.with_help(
-    "Get information about a user.",
-    args=("user (int): The user to get info on.",),
-    usage="userinfo 1234567898769420",
-)
-@tanjun.as_message_command("userinfo")
-async def user_info_cmd(
-    ctx: tanjun.abc.SlashContext,
-    user: hikari.Member | int,
-    bot: StarrBot = tanjun.inject(type=StarrBot),
-) -> None:
-    assert ctx.guild_id is not None
-
-    if isinstance(user, int):
-        user = await bot.rest.fetch_member(ctx.guild_id, user)
+@meta.command
+@lightbulb.set_help(docstring=True)
+@lightbulb.option("user", "The user to get info on.", type=hikari.Member)
+@lightbulb.command("userinfo", "Get information about a user.")
+@lightbulb.implements(lightbulb.PrefixCommand, lightbulb.SlashCommand)
+async def user_info_cmd(ctx: utils.Context) -> None:
+    """For when you feel like being a stalker."""
+    user: hikari.Member = ctx.options.user
 
     color = None
     if roles := user.get_roles():
@@ -105,11 +90,11 @@ async def user_info_cmd(
         .set_image(user.banner_url)
         .add_field(
             "Created on",
-            f"{from_datetime(user.created_at)} ({from_datetime(user.created_at, style='R')})",
+            f"<t:{user.created_at.time():.0f}:f> (<t:{user.created_at.time():.0f}:R>)",
         )
         .add_field(
             "Joined on",
-            f"{from_datetime(user.joined_at)} ({from_datetime(user.joined_at, style='R')})",
+            f"<t:{user.joined_at.time():.0f}:f> (<t:{user.joined_at.time():.0f}:R>)",
         )
         .add_field(
             "Roles",
@@ -122,6 +107,5 @@ async def user_info_cmd(
     await ctx.respond(e)
 
 
-@tanjun.as_loader
-def load_component(client: tanjun.Client) -> None:
-    client.add_component(meta.copy())
+def load(bot: StarrBot) -> None:
+    bot.add_plugin(meta)

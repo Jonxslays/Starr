@@ -31,59 +31,58 @@
 
 from __future__ import annotations
 
+import functools
 from pathlib import Path
+from typing import Callable
 
 import nox
 import toml
 
+SessionT = Callable[[nox.Session], None]
+InjectorT = Callable[[SessionT], SessionT]
 
-def get_dependencies() -> dict[str, str]:
-    with open("pyproject.toml") as f:
-        data = toml.loads(f.read())["tool"]["poetry"]
-        deps = data["dev-dependencies"]
-        deps.update(data["dependencies"])
-        deps["hikari"] = deps["hikari"]["version"]
-
-    return dict((k.lower(), f"{k}{v}") for k, v in deps.items())
+with open("pyproject.toml") as f:
+    data = toml.loads(f.read())["tool"]["poetry"]
+    deps = data["dev-dependencies"]
+    deps.update(data["dependencies"])
+    deps["hikari"] = deps["hikari"]["version"]
+    DEPS: dict[str, str] = {k.lower(): f"{k}{v}" for k, v in deps.items()}
 
 
-DEPS = get_dependencies()
+def install(*packages: str) -> InjectorT:
+    def inner(func: SessionT) -> SessionT:
+        @functools.wraps(func)
+        def wrapper(session: nox.Session) -> None:
+            session.install("-U", *(DEPS[p] for p in packages))
+            return func(session)
+
+        return wrapper
+
+    return inner
 
 
 @nox.session(reuse_venv=True)
+@install("mypy", "hikari", "hikari-lightbulb", "python-dotenv")
 def types_mypy(session: nox.Session) -> None:
-    session.install(
-        "-U",
-        DEPS["mypy"],
-        DEPS["hikari"],
-        DEPS["hikari-tanjun"],
-        DEPS["python-dotenv"],
-    )
     session.run("mypy", "starr")
 
 
 @nox.session(reuse_venv=True)
+@install("pyright", "hikari", "hikari-lightbulb", "python-dotenv")
 def types_pyright(session: nox.Session) -> None:
-    session.install(
-        "-U",
-        DEPS["pyright"],
-        DEPS["hikari"],
-        DEPS["hikari-tanjun"],
-        DEPS["python-dotenv"],
-    )
     session.run("pyright")
 
 
 @nox.session(reuse_venv=True)
+@install("black", "len8")
 def formatting(session: nox.Session) -> None:
-    session.install("-U", DEPS["black"], DEPS["len8"])
     session.run("black", ".", "--check")
     session.run("len8")
 
 
 @nox.session(reuse_venv=True)
+@install("flake8", "isort")
 def imports(session: nox.Session) -> None:
-    session.install("-U", DEPS["flake8"], DEPS["isort"])
     session.run("isort", "starr", "-cq")
     session.run(
         "flake8",
