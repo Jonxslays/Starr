@@ -101,4 +101,4 @@ class StarrBot(lightbulb.BotApp):
         if guild := self.guilds.get(message.guild_id):
             return (guild.prefix,)
 
-        return ("$",)
+        return ("./",)
