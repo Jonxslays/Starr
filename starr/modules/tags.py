@@ -52,7 +52,9 @@ tags = utils.Plugin("tags", "Tag related commands.")
 
 @tags.command
 @lightbulb.set_help(docstring=True)
-@lightbulb.option("name", "The name or alias of the tag to get.")
+@lightbulb.option(
+    "name", "The name or alias of the tag to get.", modifier=lightbulb.OptionModifier.CONSUME_REST
+)
 @lightbulb.command("tag", "Tag commands.")
 @lightbulb.implements(lightbulb.PrefixCommandGroup)
 async def tag_group(ctx: utils.PrefixContext) -> None:
@@ -79,7 +81,7 @@ async def tag_group(ctx: utils.PrefixContext) -> None:
 
 @tag_group.child
 @lightbulb.set_help(docstring=True)
-@lightbulb.option("name", "The name of the tag.")
+@lightbulb.option("name", "The name of the tag.", modifier=lightbulb.OptionModifier.CONSUME_REST)
 @lightbulb.command("info", "Get info about a tag.")
 @lightbulb.implements(lightbulb.PrefixSubCommand)
 async def tag_info_command(ctx: utils.PrefixContext) -> None:
@@ -208,7 +210,7 @@ async def tag_alias_command(ctx: utils.PrefixContext) -> None:
 
 @tag_group.child
 @lightbulb.set_help(docstring=True)
-@lightbulb.option("name", "The name of the tag.")
+@lightbulb.option("name", "The name of the tag.", modifier=lightbulb.OptionModifier.CONSUME_REST)
 @lightbulb.command("claim", "Claim a tag from a user who left the server.")
 @lightbulb.implements(lightbulb.PrefixSubCommand)
 async def tag_claim_command(ctx: utils.PrefixContext) -> None:
@@ -429,7 +431,7 @@ async def tag_transfer_command(ctx: utils.PrefixContext) -> None:
 
 @tag_group.child
 @lightbulb.set_help(docstring=True)
-@lightbulb.option("name", "The name of the tag.")
+@lightbulb.option("name", "The name of the tag.", modifier=lightbulb.OptionModifier.CONSUME_REST)
 @lightbulb.command("delete", "Delete a tag.")
 @lightbulb.implements(lightbulb.PrefixSubCommand)
 async def tag_delete_command(ctx: utils.PrefixContext) -> None:
