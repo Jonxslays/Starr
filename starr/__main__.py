@@ -37,16 +37,15 @@ from dotenv import load_dotenv
 from starr import utils
 from starr.bot import StarrBot
 
-if __name__ == "__main__":
-    load_dotenv()
+load_dotenv()
 
-    bot = StarrBot()
-    utils.configure_logging()
+bot = StarrBot()
+utils.configure_logging()
 
-    bot.run(
-        status=hikari.Status.IDLE,
-        activity=hikari.Activity(
-            name="the stars!",
-            type=hikari.ActivityType.WATCHING,
-        ),
-    )
+bot.run(
+    status=hikari.Status.IDLE,
+    activity=hikari.Activity(
+        name="the stars!",
+        type=hikari.ActivityType.WATCHING,
+    ),
+)
