@@ -90,11 +90,11 @@ async def user_info_cmd(ctx: utils.Context) -> None:
         .set_image(user.banner_url)
         .add_field(
             "Created on",
-            f"<t:{user.created_at.time():.0f}:f> (<t:{user.created_at.time():.0f}:R>)",
+            f"<t:{user.created_at.timestamp():.0f}:f> (<t:{user.created_at.timestamp():.0f}:R>)",
         )
         .add_field(
             "Joined on",
-            f"<t:{user.joined_at.time():.0f}:f> (<t:{user.joined_at.time():.0f}:R>)",
+            f"<t:{user.joined_at.timestamp():.0f}:f> (<t:{user.joined_at.timestamp():.0f}:R>)",
         )
         .add_field(
             "Roles",
