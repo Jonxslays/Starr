@@ -82,7 +82,7 @@ class StarrBot(lightbulb.BotApp):
                 obj = StarrGuild(*guild)
                 self.guilds[obj.guild_id] = obj
 
-        self.my_id = me.id if (me := self.get_me()) else (await self.rest.fetch_my_user()).id
+        self.my_id = (self.get_me() or await self.rest.fetch_my_user()).id
 
     async def on_stopped(self, _: hikari.StoppingEvent) -> None:
         await self.db.close()
