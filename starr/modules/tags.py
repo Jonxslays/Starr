@@ -118,20 +118,31 @@ async def tag_info_command(ctx: utils.PrefixContext) -> None:
 
 @tag_group.child
 @lightbulb.set_help(docstring=True)
-@lightbulb.command("list", "List this guilds tags.")
+@lightbulb.option("user", "The optional user to list tags for.", type=hikari.User, default=None)
+@lightbulb.command("list", "List tags from a user, or the guild.")
 @lightbulb.implements(lightbulb.PrefixSubCommand)
 async def tag_list_command(ctx: utils.PrefixContext) -> None:
-    """List all of this guilds tags."""
-    query = "SELECT TagName, TagOwner, Uses FROM tags WHERE GuildID = $1 ORDER BY Uses DESC;"
-    tags = await ctx.bot.db.fetch_rows(query, ctx.guild_id)
+    """List tags from a user, or the guild."""
+
+    if ctx.options.user is not None:
+        query = (
+            "SELECT tagname, tagowner, uses FROM tags "
+            "WHERE guildid = $1 AND tagowner = $2 "
+            "ORDER BY uses DESC;"
+        )
+        tags = await ctx.bot.db.fetch_rows(query, ctx.guild_id, ctx.options.user.id)
+        tags_for = str(ctx.options.user)
+    else:
+        query = "SELECT tagname, tagowner, uses FROM tags WHERE guildid = $1 ORDER BY uses DESC;"
+        tags = await ctx.bot.db.fetch_rows(query, ctx.guild_id)
+        guild = ctx.get_guild()
+        tags_for = guild.name if guild else "this guild"
 
     # If there are no tags stored
     if tags is None:
-        await ctx.respond("No tags for this guild yet, make one!")
+        await ctx.respond(f"No tags for {tags_for} yet.")
         return None
 
-    guild = ctx.get_guild()
-    guild_name = guild.name if guild else "this guild"
     fields: list[tuple[str, ...]] = []
 
     for tag in tags:
@@ -139,7 +150,7 @@ async def tag_list_command(ctx: utils.PrefixContext) -> None:
 
     pag = utils.Paginator(
         ctx,
-        title=f"Tags for {guild_name}",
+        title=f"Tags for {tags_for}",
         description="",
         per_page=5,
         fields=fields,
