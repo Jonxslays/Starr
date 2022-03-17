@@ -1,6 +1,6 @@
 # Starr
 
-A sparkly bot designed with Hikari, and Tanjun.
+A sparkly bot designed with Hikari, and Lightbulb.
 
 ## What is Hikari?
 
@@ -16,32 +16,9 @@ It gives you flexibility and control.
 For more information on Hikari check out the [repository](https://github.com/hikari-py/hikari),
 and [documentation](https://hikari-py.dev/hikari).
 
-## What is Tanjun?
+## What is Lightbulb?
 
-Tanjun is a command framework designed to extend the flexibility of Hikari.
-
-It's been really fun to learn and work with, and I have learned a lot from it.
-
-Support for:
-- Slash commands.
-- Message (prefix) commands.
-- Dependency injection.
-- Components.
-- Modules.
-- Hooks.
-- A more functional approach.
-- Converters.
-- Scheduling.
-- Cooldowns.
-- Checks.
-- More I'm forgetting obviously...
-
-For more information on Tanjun check out the [repository](https://github.com/FasterSpeeding/Tanjun),
-and [documentation](https://tanjun.cursed.solutions/release/tanjun.html).
-
-## What about Lightbulb?
-
-Lightbulb is another awesome command handler for Hikari that is designed
+Lightbulb is an awesome command handler for Hikari that is designed
 to be easy to use.
 
 Support for:
