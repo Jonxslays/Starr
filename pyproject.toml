@@ -11,7 +11,7 @@ license = "BSD-3-Clause"
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
 asyncpg = "==0.25.0"
-python-dotenv = "==0.19.2"
+python-dotenv = "==0.20.0"
 uvloop = "==0.16.0"
 hikari-lightbulb = "==2.2.1"
 
