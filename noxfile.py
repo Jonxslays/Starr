@@ -64,26 +64,26 @@ def install(*packages: str) -> InjectorT:
 @nox.session(reuse_venv=True)
 @install("mypy", "hikari", "hikari-lightbulb", "python-dotenv")
 def types_mypy(session: nox.Session) -> None:
-    session.run("mypy", "starr")
+    session.run("mypy", "starr", external=True)
 
 
 @nox.session(reuse_venv=True)
 @install("pyright", "hikari", "hikari-lightbulb", "python-dotenv")
 def types_pyright(session: nox.Session) -> None:
-    session.run("pyright")
+    session.run("pyright", external=True)
 
 
 @nox.session(reuse_venv=True)
 @install("black", "len8")
 def formatting(session: nox.Session) -> None:
-    session.run("black", ".", "--check")
-    session.run("len8")
+    session.run("black", ".", "--check", external=True)
+    session.run("len8", external=True)
 
 
 @nox.session(reuse_venv=True)
 @install("flake8", "isort")
 def imports(session: nox.Session) -> None:
-    session.run("isort", "starr", "-cq")
+    session.run("isort", "starr", "-cq", external=True)
     session.run(
         "flake8",
         "starr",
@@ -93,6 +93,7 @@ def imports(session: nox.Session) -> None:
         "E,F",
         "--extend-exclude",
         "__init__.py,",
+        external=True,
     )
 
 

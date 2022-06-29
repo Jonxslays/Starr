@@ -31,8 +31,6 @@
 
 from __future__ import annotations
 
-import datetime
-
 import hikari
 import lightbulb
 
@@ -46,7 +44,7 @@ def embedify(title: str, desc: str) -> hikari.Embed:
         title=title,
         description=desc,
         color=hikari.Color(0xDB0000),
-        timestamp=datetime.datetime.now(datetime.timezone.utc),
+        timestamp=utils.now(),
     )
 
 
@@ -55,7 +53,7 @@ async def on_command_error(event: lightbulb.CommandErrorEvent) -> None:
     e = event.exception
 
     if isinstance(e, lightbulb.CommandNotFound):
-        # Surpress command not found (how annoying)
+        # Suppress command not found (how annoying)
         ...
 
     elif isinstance(e, lightbulb.NotEnoughArguments):

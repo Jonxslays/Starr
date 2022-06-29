@@ -31,8 +31,6 @@
 
 from __future__ import annotations
 
-import datetime
-
 import hikari
 import lightbulb
 
@@ -159,7 +157,7 @@ async def configure_list_cmd(ctx: utils.SlashContext) -> None:
         hikari.Embed(
             description=f"Configurations for {name}",
             color=hikari.Color(0x13F07A),
-            timestamp=datetime.datetime.now(datetime.timezone.utc),
+            timestamp=utils.now(),
         )
         .add_field("Starboard threshold:", f"`{guild.threshold}`", inline=True)
         .add_field("Starboard channel:", f"<#{guild.star_channel}>", inline=True)

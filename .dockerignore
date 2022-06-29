@@ -1,0 +1,5 @@
+.venv/
+.nox/
+.mypy_cache/
+.github/
+**/__pycache__/

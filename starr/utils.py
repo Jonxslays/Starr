@@ -45,6 +45,10 @@ import lightbulb
 from starr.bot import StarrBot
 
 
+def now() -> datetime.datetime:
+    return datetime.datetime.now(datetime.timezone.utc)
+
+
 def configure_logging() -> None:
     log = logging.getLogger("root")
     log.setLevel(logging.INFO)

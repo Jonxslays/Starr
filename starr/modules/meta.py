@@ -31,7 +31,6 @@
 
 from __future__ import annotations
 
-import datetime
 import time
 
 import hikari
@@ -84,7 +83,7 @@ async def user_info_cmd(ctx: utils.Context) -> None:
             title=f"User info for {user}",
             description=f"ID: {user.id}",
             color=color,
-            timestamp=datetime.datetime.now(datetime.timezone.utc),
+            timestamp=utils.now(),
         )
         .set_thumbnail(user.avatar_url or user.default_avatar_url)
         .set_image(user.banner_url)

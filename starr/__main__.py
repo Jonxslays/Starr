@@ -32,7 +32,7 @@
 from __future__ import annotations
 
 import hikari
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # pyright: ignore
 
 from starr import utils
 from starr.bot import StarrBot
