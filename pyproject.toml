@@ -12,7 +12,7 @@ license = "BSD-3-Clause"
 [tool.poetry.dependencies.hikari]
 git = "https://github.com/thesadru/hikari"
 rev = "2fe70060c7a0d0432430571c8acbc7b913489ea1"
-extras = ["speedups"]
+# FIXME: Add speedups back
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
