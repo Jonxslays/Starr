@@ -14,7 +14,7 @@ asyncpg = "==0.25.0"
 python-dotenv = "==0.20.0"
 uvloop = "==0.16.0"
 hikari-lightbulb = "==2.2.2"
-hikari = {version = "==2.0.0.dev108", extras = ["speedups"]}
+hikari = {version = "==2.0.0.dev109", extras = ["speedups"]}
 
 [tool.poetry.dev-dependencies]
 black = "==22.6.0"
