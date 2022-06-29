@@ -50,7 +50,6 @@ with open("pyproject.toml") as f:
     hikari = deps["hikari"]
     url = hikari["git"]
     rev = hikari["rev"]
-    extras = hikari["extras"]
 
     deps[""] = f"git+{url}@{rev}"
     DEPS: dict[str, str] = {k.lower(): f"{k}{v}" for k, v in deps.items()}

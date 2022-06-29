@@ -52,9 +52,13 @@ strict = true
 module = "asyncpg"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "piston_rspy"
+ignore_missing_imports = true
+
 [tool.pyright]
 include = ["starr"]
-ignore = ["starr/db.py"]
+ignore = ["starr/db.py", "starr/modules/code.py"]
 typeCheckingMode = "strict"
 
 [build-system]
