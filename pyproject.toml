@@ -8,13 +8,19 @@ authors = ["Jonxslays"]
 readme = "README.md"
 license = "BSD-3-Clause"
 
+# We're pinning to test modals
+[tool.dependencies.hikari]
+git = "https://github.com/thesadru/hikari"
+rev = "2fe70060c7a0d0432430571c8acbc7b913489ea1"
+extras = ["speedups"]
+
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
 asyncpg = "==0.25.0"
 python-dotenv = "==0.20.0"
 uvloop = "==0.16.0"
 hikari-lightbulb = "==2.2.2"
-hikari = {version = "==2.0.0.dev108", extras = ["speedups"]}
+piston-rspy = "==0.3.2"
 
 [tool.poetry.dev-dependencies]
 black = "==22.6.0"
