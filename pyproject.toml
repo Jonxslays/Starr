@@ -9,7 +9,7 @@ readme = "README.md"
 license = "BSD-3-Clause"
 
 # We're pinning to test modals
-[tool.dependencies.hikari]
+[tool.poetry.dependencies.hikari]
 git = "https://github.com/thesadru/hikari"
 rev = "2fe70060c7a0d0432430571c8acbc7b913489ea1"
 extras = ["speedups"]

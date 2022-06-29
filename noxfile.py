@@ -45,7 +45,14 @@ with open("pyproject.toml") as f:
     data = toml.loads(f.read())["tool"]["poetry"]
     deps = data["dev-dependencies"]
     deps.update(data["dependencies"])
-    deps["hikari"] = deps["hikari"]["version"]
+
+    # FIXME: Put this back to normal
+    hikari = deps["hikari"]
+    url = hikari["git"]
+    rev = hikari["rev"]
+    extras = hikari["extras"]
+
+    deps[""] = f"git+{url}@{rev}"
     DEPS: dict[str, str] = {k.lower(): f"{k}{v}" for k, v in deps.items()}
 
 
@@ -61,14 +68,16 @@ def install(*packages: str) -> InjectorT:
     return inner
 
 
+# FIXME: Add hikari back
 @nox.session(reuse_venv=True)
-@install("mypy", "hikari", "hikari-lightbulb", "python-dotenv")
+@install("mypy", "", "hikari-lightbulb", "python-dotenv")
 def types_mypy(session: nox.Session) -> None:
     session.run("mypy", "starr", external=True)
 
 
+# FIXME: Add hikari back
 @nox.session(reuse_venv=True)
-@install("pyright", "hikari", "hikari-lightbulb", "python-dotenv")
+@install("pyright", "", "hikari-lightbulb", "python-dotenv")
 def types_pyright(session: nox.Session) -> None:
     session.run("pyright", external=True)
 
