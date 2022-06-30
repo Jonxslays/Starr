@@ -124,7 +124,8 @@ async def handle_modal_responses(ctx: utils.SlashContext, language: str, nonce: 
 
             response = await client.execute(executor)
             embed = build_response_embed(response).set_author(
-                name=ctx.author.username, icon=ctx.author.avatar_url or ctx.author.default_avatar_url
+                name=ctx.author.username,
+                icon=ctx.author.avatar_url or ctx.author.default_avatar_url,
             )
 
             await inter.edit_initial_response(embed)  # pyright: ignore

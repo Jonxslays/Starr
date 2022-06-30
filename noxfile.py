@@ -69,14 +69,14 @@ def install(*packages: str) -> InjectorT:
 
 # FIXME: Add hikari back
 @nox.session(reuse_venv=True)
-@install("mypy", "", "hikari-lightbulb", "python-dotenv")
+@install("mypy", "", "hikari-lightbulb", "python-dotenv", "piston-rspy")
 def types_mypy(session: nox.Session) -> None:
     session.run("mypy", "starr", external=True)
 
 
 # FIXME: Add hikari back
 @nox.session(reuse_venv=True)
-@install("pyright", "", "hikari-lightbulb", "python-dotenv")
+@install("pyright", "", "hikari-lightbulb", "python-dotenv", "piston-rspy")
 def types_pyright(session: nox.Session) -> None:
     session.run("pyright", external=True)
 
