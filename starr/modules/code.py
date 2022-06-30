@@ -43,7 +43,7 @@ from starr.bot import StarrBot
 code = utils.Plugin("code", "Can you even program?")
 
 client = piston_rspy.Client()
-_runtimes = None
+_runtimes: list[str] | None = None
 
 
 def filter_modal_interactions(
@@ -149,8 +149,16 @@ async def run_command(ctx: utils.SlashContext) -> None:
         .add_to_container()
     )
 
+    if _runtimes and language not in _runtimes:
+        await ctx.interaction.create_initial_response(
+            hikari.ResponseType.MESSAGE_CREATE,
+            f"Oops, that was not a valid language.",
+            flags=hikari.MessageFlag.EPHEMERAL,
+        )
+        return None
+
     await ctx.interaction.create_modal_response(
-        f"Running {language}", f"run-modal-{nonce}", (components,)
+        f"Running {language.split()[0]}"[:45], f"run-modal-{nonce}", (components,)
     )
 
     await handle_modal_responses(ctx, language, nonce)
@@ -160,12 +168,12 @@ async def run_command(ctx: utils.SlashContext) -> None:
 async def run_autocomplete(
     option: hikari.AutocompleteInteractionOption, _inter: hikari.AutocompleteInteraction
 ) -> tuple[str, ...]:
-    _runtimes = globals().get("_runtimes")
+    global _runtimes
 
     if not _runtimes:
         buffer = await client.fetch_runtimes()
         pretty = tuple(f"{r.language.lower()} - v{r.version}" for r in buffer)
-        _runtimes = globals()["_runtimes"] = sorted(pretty)
+        _runtimes = sorted(pretty)
 
     assert isinstance(option.value, str)
     return tuple(r for r in _runtimes if r.startswith(option.value.lower()))[:25]
