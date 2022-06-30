@@ -68,7 +68,7 @@ def wrap_result(text: str) -> str:
 
 def build_response_embed(resp: piston_rspy.ExecResponse) -> hikari.Embed:
     embed = hikari.Embed(
-        title=f"{resp.language} - v{resp.version}",
+        title=f"Executed your {resp.language} {resp.version} code",
         timestamp=utils.now(),
         color=0x14C41F,
     )
@@ -82,13 +82,23 @@ def build_response_embed(resp: piston_rspy.ExecResponse) -> hikari.Embed:
         if resp.run.is_err():
             embed.color = hikari.Color(0xE61E1E)
 
-        result = wrap_result(resp.run.output[:1011])
+        run_output = resp.run.output
+
+        if len(run_output) >= 1014:
+            run_output = run_output[:1011] + "..."
+
+        result = wrap_result(run_output)
     else:
         result = wrap_result("No output")
 
     if resp.compile:
         if resp.compile.is_err():
-            embed.add_field("Compiler errors:", wrap_result(resp.compile.stderr[:1011]))
+            compile_output = resp.compile.stderr
+
+            if len(compile_output) >= 1014:
+                compile_output = compile_output[:1011] + "..."
+
+            embed.add_field("Compiler errors:", wrap_result(compile_output))
             embed.color = hikari.Color(0xE61E1E)
 
     embed.add_field("Output", result)
@@ -113,7 +123,10 @@ async def handle_modal_responses(ctx: utils.SlashContext, language: str, nonce: 
             )
 
             response = await client.execute(executor)
-            embed = build_response_embed(response).set_author(ctx.author)
+            embed = build_response_embed(response).set_author(
+                name=ctx.author.username, icon=ctx.author.avatar_url or ctx.author.default_avatar_url
+            )
+
             await inter.edit_initial_response(embed)  # pyright: ignore
             return None
 
