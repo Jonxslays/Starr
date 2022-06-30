@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "starr"
-version = "0.4.0"
+version = "0.5.0"
 description = "A sparkly bot designed with Hikari."
 homepage = "https://github.com/Jonxslays/Starr"
 repository = "https://github.com/Jonxslays/Starr"
