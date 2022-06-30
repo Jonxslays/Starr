@@ -35,7 +35,7 @@ import secrets
 
 import hikari
 import lightbulb
-import piston_rspy  # type; ignore
+import piston_rspy
 
 from starr import utils
 from starr.bot import StarrBot
@@ -62,7 +62,7 @@ def filter_modal_interactions(
 
 
 def wrap_result(text: str) -> str:
-    backtick = "\\```"
+    backtick = "`\u200b``"
     return f"```sh\n{text.replace('```', backtick)}```"
 
 
@@ -79,17 +79,19 @@ def build_response_embed(resp: piston_rspy.ExecResponse) -> hikari.Embed:
         return embed
 
     if resp.run.output:
-        result = wrap_result(resp.run.output)
+        if resp.run.is_err():
+            embed.color = hikari.Color(0xE61E1E)
+
+        result = wrap_result(resp.run.output[:1011])
     else:
         result = wrap_result("No output")
 
-    embed.add_field("Output", result)
-
     if resp.compile:
-        if resp.compile.stderr:
-            embed.add_field("Compiler errors:", wrap_result(resp.compile.stderr))
+        if resp.compile.is_err():
+            embed.add_field("Compiler errors:", wrap_result(resp.compile.stderr[:1011]))
             embed.color = hikari.Color(0xE61E1E)
 
+    embed.add_field("Output", result)
     return embed
 
 

@@ -86,12 +86,15 @@ async def on_command_error(event: lightbulb.CommandErrorEvent) -> None:
         )
 
     elif isinstance(e, lightbulb.CommandInvocationError):
-        await event.context.respond(
-            embedify(
-                "This command is broken...",
-                f"**{e.original.__class__.__name__}**: ```{e.original}```",
-            )
+        embed = embedify(
+            "This command is broken...",
+            f"**{e.original.__class__.__name__}**: ```{e.original}```",
         )
+
+        try:
+            await event.context.respond(embed)
+        except hikari.BadRequestError:
+            await event.context.bot.rest.create_message(event.context.channel_id, embed)
 
         raise e  # For logging
 
