@@ -20,7 +20,7 @@ asyncpg = "==0.25.0"
 python-dotenv = "==0.20.0"
 uvloop = "==0.16.0"
 hikari-lightbulb = "==2.2.2"
-piston-rspy = "==0.3.2"
+piston-rspy = "==0.4.0"
 
 [tool.poetry.dev-dependencies]
 black = "==22.6.0"
@@ -50,10 +50,6 @@ strict = true
 
 [[tool.mypy.overrides]]
 module = "asyncpg"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "piston_rspy"
 ignore_missing_imports = true
 
 [tool.pyright]

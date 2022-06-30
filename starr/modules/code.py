@@ -113,7 +113,7 @@ async def handle_modal_responses(ctx: utils.SlashContext, language: str, nonce: 
             )
 
             response = await client.execute(executor)
-            embed = build_response_embed(response)
+            embed = build_response_embed(response).set_author(ctx.author)
             await inter.edit_initial_response(embed)  # pyright: ignore
             return None
 
