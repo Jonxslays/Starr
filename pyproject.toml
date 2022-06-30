@@ -54,7 +54,7 @@ ignore_missing_imports = true
 
 [tool.pyright]
 include = ["starr"]
-ignore = ["starr/db.py", "starr/modules/code.py"]
+ignore = ["starr/db.py"]
 typeCheckingMode = "strict"
 
 [build-system]
