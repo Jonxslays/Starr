@@ -8,10 +8,11 @@ authors = ["Jonxslays"]
 readme = "README.md"
 license = "BSD-3-Clause"
 
+# Extra pinned to davs branch to test the 1204 PR
 # We're pinning to test modals
 [tool.poetry.dependencies.hikari]
-git = "https://github.com/thesadru/hikari"
-rev = "2fe70060c7a0d0432430571c8acbc7b913489ea1"
+git = "https://github.com/davfsa/hikari"
+rev = "e6994585981cacc184bc071b059fed0811d95183"
 # FIXME: Add speedups back
 
 [tool.poetry.dependencies]
