@@ -65,15 +65,17 @@ async def ping_command(ctx: utils.PrefixContext) -> None:
 async def user_info_cmd(ctx: utils.Context) -> None:
     """For when you feel like being a stalker."""
     user: hikari.Member = ctx.options.user
+    roles = []
 
     color = None
-    if roles := user.get_roles():
-        roles = sorted(roles, key=lambda r: r.position, reverse=True)
+    if isinstance(user, hikari.Member):
+        if roles := user.get_roles():
+            roles = sorted(roles, key=lambda r: r.position, reverse=True)
 
-        for role in roles:
-            if role.color:
-                color = role.color
-                break
+            for role in roles:
+                if role.color:
+                    color = role.color
+                    break
 
     if not color:
         color = hikari.Color(0x31A6E0)
@@ -98,7 +100,7 @@ async def user_info_cmd(ctx: utils.Context) -> None:
         .add_field(
             "Roles",
             ", ".join(
-                (r.mention if ctx.guild_id != r.id else "@everyone" for r in roles) or "No roles?"
+                (r.mention if ctx.guild_id != r.id else "@everyone" for r in roles) or "No roles"
             ),
         )
     )
