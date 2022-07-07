@@ -65,12 +65,11 @@ async def tag_group(ctx: utils.PrefixContext) -> None:
     """
     name = ctx.options.name.lower()
     query = (
-        "UPDATE tags SET uses = t.uses + 1 "
-        "FROM tags t FULL OUTER JOIN tag_aliases a "
-        "ON t.tagname = a.tagname WHERE t.guildid = $1 "
-        "AND a.guildid = t.guildid "
-        "AND (t.tagname = $2 OR a.tagalias = $2) "
-        "RETURNING t.tagcontent;"
+        "UPDATE tags SET uses = uses + 1 "
+        "FROM tag_aliases a WHERE tags.guildid = $1 "
+        "AND tags.tagname = $2 "
+        "OR (a.tagalias = $2 AND tags.tagname = a.tagname) "
+        "RETURNING tags.tagcontent;"
     )
 
     if content := await ctx.bot.db.fetch_one(query, ctx.guild_id, name):
@@ -267,12 +266,11 @@ async def tag_create_command(ctx: utils.PrefixContext) -> None:
     name = ctx.options.name.lower()
     content = ctx.options.content
     query = (
-        "UPDATE tags SET uses = t.uses + 1 "
-        "FROM tags t FULL OUTER JOIN tag_aliases a "
-        "ON t.tagname = a.tagname WHERE t.guildid = $1 "
-        "AND a.guildid = t.guildid "
-        "AND (t.tagname = $2 OR a.tagalias = $2) "
-        "RETURNING t.tagowner;"
+        "UPDATE tags SET uses = uses + 1 "
+        "FROM tag_aliases a WHERE tags.guildid = $1 "
+        "AND tags.tagname = $2 "
+        "OR (a.tagalias = $2 AND tags.tagname = a.tagname) "
+        "RETURNING tags.tagowner;"
     )
 
     # Can't create a reserved tag
