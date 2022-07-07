@@ -43,6 +43,7 @@ bot = StarrBot()
 utils.configure_logging()
 
 bot.run(
+    asyncio_debug=True,
     status=hikari.Status.IDLE,
     activity=hikari.Activity(
         name="the stars!",
