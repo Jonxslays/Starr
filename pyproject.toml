@@ -12,7 +12,7 @@ license = "BSD-3-Clause"
 # We're pinning to test modals
 [tool.poetry.dependencies.hikari]
 git = "https://github.com/davfsa/hikari"
-rev = "346fee9f1740359ad863b371cc3bce06e868c38c"
+rev = "021d6b7aab4676c1f3db0ca5d0c0afd28911aeee"
 # FIXME: Add speedups back
 
 [tool.poetry.dependencies]
