@@ -51,7 +51,7 @@ def now() -> datetime.datetime:
 
 def configure_logging() -> None:
     log = logging.getLogger("root")
-    log.setLevel(logging.INFO)
+    log.setLevel(logging.DEBUG)
 
     rfh = RotatingFileHandler(
         "./starr/data/logs/main.log",
