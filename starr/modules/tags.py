@@ -274,9 +274,10 @@ async def tag_create_command(ctx: utils.PrefixContext) -> None:
     )
 
     # Can't create a reserved tag
-    if name in RESERVED_TAGS:
+    if any(name.startswith(r) for r in RESERVED_TAGS):
         await ctx.respond(
-            f"The following tag names are reserved: ```{', '.join(RESERVED_TAGS)}```",
+            "Your tag name must not start with a reserved tag: "
+            f"```{', '.join(RESERVED_TAGS)}```",
         )
         return None
 
