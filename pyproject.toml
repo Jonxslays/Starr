@@ -24,7 +24,7 @@ piston-rspy = "==0.4.0"
 
 [tool.poetry.dev-dependencies]
 black = "==22.6.0"
-mypy = "==0.961"
+mypy = "==0.982"
 nox = "==2022.1.7"
 pyright = "==1.1.256"
 len8 = "==0.7.3.post0"
