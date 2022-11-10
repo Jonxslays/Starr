@@ -23,7 +23,7 @@ hikari-lightbulb = "==2.2.2"
 piston-rspy = "==0.4.0"
 
 [tool.poetry.dev-dependencies]
-black = "==22.6.0"
+black = "==22.10.0"
 mypy = "==0.990"
 nox = "==2022.1.7"
 pyright = "==1.1.279"
