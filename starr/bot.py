@@ -43,7 +43,17 @@ from starr.models import StarrGuild
 
 class StarrBot(lightbulb.BotApp):
 
-    __slots__ = ("star", "db", "guilds", "log", "client", "my_id", "session")
+    __slots__ = (
+        "star",
+        "db",
+        "guilds",
+        "log",
+        "client",
+        "my_id",
+        "session",
+        "queue",
+        "queue_task",
+    )
 
     def __init__(self) -> None:
         super().__init__(

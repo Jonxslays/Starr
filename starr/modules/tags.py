@@ -398,7 +398,7 @@ async def tag_edit_command(ctx: utils.PrefixContext) -> None:
 
 @tag_group.child
 @lightbulb.set_help(docstring=True)
-@lightbulb.option("user", "The name/ID of the user to transer to.", type=hikari.User)
+@lightbulb.option("user", "The name/ID of the user to transfer to.", type=hikari.User)
 @lightbulb.option("name", "The name of the tag.")
 @lightbulb.command("transfer", "Transfer a tag to another user.")
 @lightbulb.implements(lightbulb.PrefixSubCommand)
