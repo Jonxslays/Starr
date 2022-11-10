@@ -37,6 +37,7 @@ import aiohttp
 import hikari
 import lightbulb
 
+from starr import utils
 from starr.db import Database
 from starr.models import StarrGuild
 
@@ -64,11 +65,7 @@ class StarrBot(lightbulb.BotApp):
             prefix=lightbulb.when_mentioned_or(self.resolve_prefix),
             case_insensitive_prefix_commands=True,
             owner_ids=(452940863052578816,),
-            default_enabled_guilds=(
-                (int(environ["DEV"]),)
-                if not int(environ["IS_PROD"])
-                else tuple(int(i) for i in (environ["DEV"], environ["PROD"]))
-            ),
+            default_enabled_guilds=utils.get_command_guilds(),
         )
 
         self.db = Database()

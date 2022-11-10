@@ -38,6 +38,7 @@ import math
 import secrets
 import typing as t
 from logging.handlers import RotatingFileHandler
+from os import environ
 
 import hikari
 import lightbulb
@@ -67,6 +68,15 @@ def configure_logging() -> None:
 
     rfh.setFormatter(ff)
     log.addHandler(rfh)
+
+
+def get_command_guilds() -> list[int]:
+    guilds = [int(environ["DEV"])]
+
+    if int(environ["IS_PROD"]):
+        guilds.extend(int(gid) for gid in environ["PROD"].split(":"))
+
+    return guilds
 
 
 class Plugin(lightbulb.Plugin):
