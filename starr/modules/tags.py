@@ -344,7 +344,7 @@ async def tag_edit_command(ctx: utils.PrefixContext) -> None:
     response = await ctx.respond(
         f"**WARNING**\nNo `{name}` tag exists to edit. Would you like to create it now?",
         component=(
-            ctx.bot.rest.build_action_row()
+            ctx.bot.rest.build_message_action_row()
             .add_button(
                 hikari.ButtonStyle.SUCCESS,
                 "yes",

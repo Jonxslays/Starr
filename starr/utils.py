@@ -92,7 +92,7 @@ class Context(lightbulb.Context):
 
     @property
     @abc.abstractmethod
-    def guild_id(self) -> hikari.Snowflakeish:
+    def guild_id(self) -> hikari.Snowflake:
         ...
 
 
@@ -196,7 +196,7 @@ class Paginator:
         self.message = await response.message()
         await self.listen(timeout)
 
-    def generate_buttons(self, page: int) -> list[hikari.api.ActionRowBuilder]:
+    def generate_buttons(self, page: int) -> list[hikari.api.MessageActionRowBuilder]:
         buttons = {
             "first": "\u23EE\uFE0F",
             "prev": "\u23EA",
@@ -205,7 +205,7 @@ class Paginator:
             "last": "\u23ED\uFE0F",
         }
 
-        row = self.ctx.bot.rest.build_action_row()
+        row = self.ctx.bot.rest.build_message_action_row()
 
         for key, button in buttons.items():
             style = hikari.ButtonStyle.PRIMARY if key != "stop" else hikari.ButtonStyle.DANGER
@@ -234,7 +234,7 @@ class Paginator:
     async def respond(
         self,
         interaction: hikari.ComponentInteraction | None,
-        components: list[hikari.api.ActionRowBuilder],
+        components: list[hikari.api.MessageActionRowBuilder],
     ) -> None:
         assert self.message is not None
         embed = self.get_next_embed(self.converted[self.page])

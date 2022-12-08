@@ -49,15 +49,10 @@ _runtimes: list[str] | None = None
 def filter_modal_interactions(
     e: hikari.InteractionCreateEvent, ctx: utils.SlashContext, nonce: str
 ) -> bool:
-    # if not isinstance(e.interaction, hikari.ModalInteraction):
-    #     return False
-
-    # reveal_type(e.interaction)
-
     return (
         isinstance(e.interaction, hikari.ModalInteraction)
-        and e.interaction.user == ctx.author  # pyright: ignore
-        and e.interaction.custom_id == f"run-modal-{nonce}"  # pyright: ignore
+        and e.interaction.user == ctx.author
+        and e.interaction.custom_id == f"run-modal-{nonce}"
     )
 
 
@@ -112,11 +107,9 @@ async def handle_modal_responses(ctx: utils.SlashContext, language: str, nonce: 
         async for event in stream:
             inter = event.interaction
             assert isinstance(inter, hikari.ModalInteraction)
-            await inter.create_initial_response(  # pyright: ignore
-                hikari.ResponseType.DEFERRED_MESSAGE_CREATE
-            )
+            await inter.create_initial_response(hikari.ResponseType.DEFERRED_MESSAGE_CREATE)
 
-            text: str = inter.components[0].components[0].value  # type: ignore
+            text: str = inter.components[0].components[0].value
             executor = piston_rspy.Executor(
                 language=language.split(maxsplit=1)[0],
                 files=[piston_rspy.File(content=text)],
@@ -128,7 +121,7 @@ async def handle_modal_responses(ctx: utils.SlashContext, language: str, nonce: 
                 icon=ctx.author.avatar_url or ctx.author.default_avatar_url,
             )
 
-            await inter.edit_initial_response(embed)  # pyright: ignore
+            await inter.edit_initial_response(embed)
             return None
 
 
@@ -143,7 +136,7 @@ async def run_command(ctx: utils.SlashContext) -> None:
     language = ctx.options.language
 
     components = (
-        ctx.bot.rest.build_action_row()
+        ctx.bot.rest.build_modal_action_row()
         .add_text_input(f"run-input-{nonce}", "Add code here")
         .set_style(hikari.TextInputStyle.PARAGRAPH)
         .add_to_container()
@@ -158,7 +151,7 @@ async def run_command(ctx: utils.SlashContext) -> None:
         return None
 
     await ctx.interaction.create_modal_response(
-        f"Running {language.split()[0]}"[:45], f"run-modal-{nonce}", (components,)
+        f"Running {language.split()[0]}"[:45], f"run-modal-{nonce}", components
     )
 
     await handle_modal_responses(ctx, language, nonce)
