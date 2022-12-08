@@ -52,8 +52,6 @@ class StarrBot(lightbulb.BotApp):
         "client",
         "my_id",
         "session",
-        "queue",
-        "queue_task",
     )
 
     def __init__(self) -> None:
@@ -61,7 +59,8 @@ class StarrBot(lightbulb.BotApp):
             token=environ["TOKEN"],
             intents=hikari.Intents.GUILDS
             | hikari.Intents.GUILD_MESSAGE_REACTIONS
-            | hikari.Intents.GUILD_MESSAGES,
+            | hikari.Intents.GUILD_MESSAGES
+            | hikari.Intents.MESSAGE_CONTENT,
             prefix=lightbulb.when_mentioned_or(self.resolve_prefix),
             case_insensitive_prefix_commands=True,
             owner_ids=(452940863052578816,),
