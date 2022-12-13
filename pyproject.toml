@@ -24,7 +24,7 @@ nox = "==2022.11.21"
 pyright = "==1.1.283"
 len8 = "==0.7.3.post0"
 flake8 = "==5.0.4"
-isort = "==5.10.1"
+isort = "==5.11.1"
 toml = "==0.10.2"
 
 [tool.black]
