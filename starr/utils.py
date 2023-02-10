@@ -161,12 +161,16 @@ class Paginator:
         )
 
     def get_next_embed(self, fields: list[tuple[str, ...]]) -> hikari.Embed:
-        embed = hikari.Embed(
-            title=self.title,
-            description=self.description,
-            color=hikari.Color(0x19FA3B),
-            timestamp=datetime.datetime.now(datetime.timezone.utc),
-        ).set_thumbnail(self.ctx.author.avatar_url or self.ctx.author.default_avatar_url)
+        embed = (
+            hikari.Embed(
+                title=self.title,
+                description=self.description,
+                color=hikari.Color(0x19FA3B),
+                timestamp=datetime.datetime.now(datetime.timezone.utc),
+            )
+            .set_thumbnail(self.ctx.author.avatar_url or self.ctx.author.default_avatar_url)
+            .set_footer(f"Page {self.page} of {self.num_pages}")
+        )
 
         for field in fields:
             embed.add_field(field[0], field[1], inline=self.inline)
