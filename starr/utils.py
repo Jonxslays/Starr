@@ -169,7 +169,7 @@ class Paginator:
                 timestamp=datetime.datetime.now(datetime.timezone.utc),
             )
             .set_thumbnail(self.ctx.author.avatar_url or self.ctx.author.default_avatar_url)
-            .set_footer(f"Page {self.page} of {self.num_pages}")
+            .set_footer(f"Page {self.page + 1} of {self.num_pages}")
         )
 
         for field in fields:
