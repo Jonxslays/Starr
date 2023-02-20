@@ -19,7 +19,7 @@ hikari = { version = "==2.0.0.dev113", extras = ["speedups"] }
 
 [tool.poetry.dev-dependencies]
 black = "==22.10.0"
-mypy = "==0.990"
+mypy = "==1.0.1"
 nox = "==2022.11.21"
 pyright = "==1.1.283"
 len8 = "==0.7.3.post0"
