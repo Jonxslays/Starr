@@ -37,7 +37,6 @@ from starr.db import Database
 
 
 class StarrGuild:
-
     __slots__ = ("_guild_id", "_prefix", "_star_channel", "_threshold", "_star_blacklist")
 
     def __init__(
@@ -127,7 +126,6 @@ class StarrGuild:
 
 
 class StarboardMessage:
-
     __slots__ = ("_message_id", "_reference_id", "_guild")
 
     def __init__(self, message_id: int, reference_id: int, guild: StarrGuild) -> None:
@@ -245,7 +243,7 @@ class StarboardMessage:
         new_message = await rest.create_message(
             content=f"You're a \u2B50 x{count}!\n",
             channel=guild.star_channel,
-            embeds=(embed, *original_message.embeds[0:9]),
+            embeds=(embed, *(e for e in original_message.embeds[0:9] if e.description)),
         )
 
         starboard_message = cls(new_message.id, original_message.id, guild)
